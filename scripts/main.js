@@ -1,4 +1,5 @@
 
+const { html, render: renderElem } = uhtml;
 // Use instead of document.getElementById
 const domRefs = {};
 function getRef(elementId) {
@@ -180,6 +181,119 @@ function loading(show = true) {
         getRef('loading').classList.add('hidden')
     }
 }
+function getSignedIn(passwordType) {
+    return new Promise((resolve, reject) => {
+        try {
+            console.log(floDapps.user.id)
+            getPromptInput('Enter password', '', {
+                isPassword: true,
+            }).then(password => {
+                if (password) {
+                    resolve(password)
+                }
+            })
+        } catch (err) {
+            if (passwordType === 'PIN/Password') {
+                floGlobals.isPrivKeySecured = true;
+                getRef('private_key_field').removeAttribute('data-private-key');
+                getRef('private_key_field').setAttribute('placeholder', 'Password');
+                getRef('private_key_field').customValidation = null
+            } else {
+                floGlobals.isPrivKeySecured = false;
+                getRef('private_key_field').dataset.privateKey = ''
+                getRef('private_key_field').setAttribute('placeholder', 'FLO private key');
+                getRef('private_key_field').customValidation = floCrypto.getPubKeyHex;
+            }
+            if (window.location.hash.includes('sign_in') || window.location.hash.includes('sign_up')) {
+                routeTo(window.location.hash);
+            } else {
+                location.hash = `#/sign_in`;
+            }
+            getRef('sign_in_button').onclick = () => {
+                resolve(getRef('private_key_field').value.trim());
+                getRef('private_key_field').value = '';
+                routeTo('loading');
+            };
+            getRef('sign_up_button').onclick = () => {
+                resolve(getRef('keys_generator').keys.privKey);
+                getRef('keys_generator').clearKeys();
+                routeTo('loading');
+            };
+        }
+    });
+}
+function setSecurePassword() {
+    if (!floGlobals.isPrivKeySecured) {
+        const password = getRef('secure_pwd_input').value.trim();
+        floDapps.securePrivKey(password).then(() => {
+            floGlobals.isPrivKeySecured = true;
+            notify('Password set successfully', 'success');
+            closePopup();
+        }).catch(err => {
+            notify(err, 'error');
+        })
+    }
+}
+function signOut() {
+    getConfirmation('Sign out?', { message: 'You are about to sign out of the app, continue?', confirmText: 'Leave', cancelText: 'Stay' })
+        .then(async (res) => {
+            if (res) {
+                await floDapps.clearCredentials();
+                location.reload();
+            }
+        });
+}
+
+// detect browser version
+function detectBrowser() {
+    let ua = navigator.userAgent,
+        tem,
+        M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+    if (/trident/i.test(M[1])) {
+        tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+        return 'IE ' + (tem[1] || '');
+    }
+    if (M[1] === 'Chrome') {
+        tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+        if (tem != null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+    }
+    M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+    if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
+    return M.join(' ');
+}
+function createRipple(event, target) {
+    const circle = document.createElement("span");
+    const diameter = Math.max(target.clientWidth, target.clientHeight);
+    const radius = diameter / 2;
+    const targetDimensions = target.getBoundingClientRect();
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${event.clientX - (targetDimensions.left + radius)}px`;
+    circle.style.top = `${event.clientY - (targetDimensions.top + radius)}px`;
+    circle.classList.add("ripple");
+    const rippleAnimation = circle.animate(
+        [
+            {
+                opacity: 1,
+                transform: `scale(0)`
+            },
+            {
+                transform: "scale(4)",
+                opacity: 0,
+            },
+        ],
+        {
+            duration: 600,
+            fill: "forwards",
+            easing: "ease-out",
+        }
+    );
+    target.append(circle);
+    rippleAnimation.onfinish = () => {
+        circle.remove();
+    };
+}
+
+
 function getApprovedAggregators() {
     floGlobals.approvedKycAggregators = {};
     return new Promise((resolve, reject) => {
