@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KYC docs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/main.css">
+    <script id="floGlobals">
+        /* Constants for FLO blockchain operations !!Make sure to add this at beginning!! */
+        const floGlobals = {
+            blockchain: "FLO",
+            adminID: "FKAEdnPfjXLHSYwrXQu377ugN4tXU7VGdf",
+            application: "TEST_MODE",
+            SNStorageID: "FSF5igBd9xC7ZBB511DZG8PVB2eT93YE3M",
+            masterAddress: 'FRSUrLuy5nhz6PCyuxMmo7vg9JmTFX5Goi'
+        }
+    </script>
+    <script>
+            (function () {
+                const urlSearchParams = new URLSearchParams(window.location.search);
+                const params = Object.fromEntries(urlSearchParams.entries());
+                if ('testnet' in params) {
+                    floGlobals.blockchain = "FLO_TEST";
+                    floGlobals.adminID = "oKKHdK5uYAJ52U91sYsWhnEaEAAhZP779B";
+                    floGlobals.application = "TEST_MODE_testnet";
+                }
+
+                if ('quick' in params)
+                    window.quick = true;
+
+            })();
+    </script>
+    <script src="scripts/lib.js"></script>
+    <script src="scripts/floCrypto.js"></script>
+    <script src="scripts/btcOperator.js"></script>
+    <script src="scripts/floBlockchainAPI.js"></script>
+    <script src="scripts/floTokenAPI.js"></script>
+    <script src="scripts/compactIDB.js"></script>
+    <script src="scripts/floCloudAPI.js"></script>
+    <script src="scripts/floDapps.js"></script>
+    <script src="scripts/components.min.js"></script>
+    <script src="scripts/main.js"></script>
+    <script id="onLoadStartUp">
+        async function onLoadStartUp() {
+            if (window.quick) return;
+            //floDapps.addStartUpFunction('Sample', Promised Function)
+            //floDapps.setAppObjectStores({sampleObs1:{}, sampleObs2:{options{autoIncrement:true, keyPath:'SampleKey'}, Indexes:{sampleIndex:{}}}})
+            //floDapps.setCustomPrivKeyInput( () => { FUNCTION BODY *must resolve private key* } )
+            floDapps.launchStartUp().then(result => {
+                console.log(result)
+                //App functions....
+            }).catch(error => console.error(error))
+
+            try {
+                await getApprovedAggregators();
+                await getApprovedKycs();
+                router.routeTo(window.location.hash)
+                console.log('Loaded');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+    </script>
+</head>
+
+<body onload="onLoadStartUp()">
+    <sm-notifications id="notification_drawer"></sm-notifications>
+    <article id="loading">
+        <sm-spinner></sm-spinner>
+        <h4>Loading RanchiMall KYC Docs</h4>
+    </article>
+    <article>
+        <header id="main_header">
+            <div class="app-brand margin-right-auto">
+                <svg id="main_logo" class="icon" viewBox="0 0 27.25 32">
+                    <title>RanchiMall</title>
+                    <path
+                        d="M27.14,30.86c-.74-2.48-3-4.36-8.25-6.94a20,20,0,0,1-4.2-2.49,6,6,0,0,1-1.25-1.67,4,4,0,0,1,0-2.26c.37-1.08.79-1.57,3.89-4.55a11.66,11.66,0,0,0,3.34-4.67,6.54,6.54,0,0,0,.05-2.82C20,3.6,18.58,2,16.16.49c-.89-.56-1.29-.64-1.3-.24a3,3,0,0,1-.3.72l-.3.55L13.42.94C13,.62,12.4.26,12.19.15c-.4-.2-.73-.18-.72.05a9.39,9.39,0,0,1-.61,1.33s-.14,0-.27-.13C8.76.09,8-.27,8,.23A11.73,11.73,0,0,1,6.76,2.6C4.81,5.87,2.83,7.49.77,7.49c-.89,0-.88,0-.61,1,.22.85.33.92,1.09.69A5.29,5.29,0,0,0,3,8.33c.23-.17.45-.29.49-.26a2,2,0,0,1,.22.63A1.31,1.31,0,0,0,4,9.34a5.62,5.62,0,0,0,2.27-.87L7,8l.13.55c.19.74.32.82,1,.65a7.06,7.06,0,0,0,3.46-2.47l.6-.71-.06.64c-.17,1.63-1.3,3.42-3.39,5.42L6.73,14c-3.21,3.06-3,5.59.6,8a46.77,46.77,0,0,0,4.6,2.41c.28.13,1,.52,1.59.87,3.31,2,4.95,3.92,4.95,5.93a2.49,2.49,0,0,0,.07.77h0c.09.09,0,.1.9-.14a2.61,2.61,0,0,0,.83-.32,3.69,3.69,0,0,0-.55-1.83A11.14,11.14,0,0,0,17,26.81a35.7,35.7,0,0,0-5.1-2.91C9.37,22.64,8.38,22,7.52,21.17a3.53,3.53,0,0,1-1.18-2.48c0-1.38.71-2.58,2.5-4.23,2.84-2.6,3.92-3.91,4.67-5.65a3.64,3.64,0,0,0,.42-2A3.37,3.37,0,0,0,13.61,5l-.32-.74.29-.48c.17-.27.37-.63.46-.8l.15-.3.44.64a5.92,5.92,0,0,1,1,2.81,5.86,5.86,0,0,1-.42,1.94c0,.12-.12.3-.15.4a9.49,9.49,0,0,1-.67,1.1,28,28,0,0,1-4,4.29C8.62,15.49,8.05,16.44,8,17.78a3.28,3.28,0,0,0,1.11,2.76c.95,1,2.07,1.74,5.25,3.32,3.64,1.82,5.22,2.9,6.41,4.38A4.78,4.78,0,0,1,21.94,31a3.21,3.21,0,0,0,.14.92,1.06,1.06,0,0,0,.43-.05l.83-.22.46-.12-.06-.46c-.21-1.53-1.62-3.25-3.94-4.8a37.57,37.57,0,0,0-5.22-2.82A13.36,13.36,0,0,1,11,21.19a3.36,3.36,0,0,1-.8-4.19c.41-.85.83-1.31,3.77-4.15,2.39-2.31,3.43-4.13,3.43-6a5.85,5.85,0,0,0-2.08-4.29c-.23-.21-.44-.43-.65-.65A2.5,2.5,0,0,1,15.27.69a10.6,10.6,0,0,1,2.91,2.78A4.16,4.16,0,0,1,19,6.16a4.91,4.91,0,0,1-.87,3c-.71,1.22-1.26,1.82-4.27,4.67a9.47,9.47,0,0,0-2.07,2.6,2.76,2.76,0,0,0-.33,1.54,2.76,2.76,0,0,0,.29,1.47c.57,1.21,2.23,2.55,4.65,3.73a32.41,32.41,0,0,1,5.82,3.24c2.16,1.6,3.2,3.16,3.2,4.8a1.94,1.94,0,0,0,.09.76,4.54,4.54,0,0,0,1.66-.4C27.29,31.42,27.29,31.37,27.14,30.86ZM6.1,7h0a3.77,3.77,0,0,1-1.46.45L4,7.51l.68-.83a25.09,25.09,0,0,0,3-4.82A12,12,0,0,1,8.28.76c.11-.12.77.32,1.53,1l.63.58-.57.84A10.34,10.34,0,0,1,6.1,7Zm5.71-1.78A9.77,9.77,0,0,1,9.24,7.18h0a5.25,5.25,0,0,1-1.17.28l-.58,0,.65-.78a21.29,21.29,0,0,0,2.1-3.12c.22-.41.42-.76.44-.79s.5.43.9,1.24L12,5ZM13.41,3a2.84,2.84,0,0,1-.45.64,11,11,0,0,1-.9-.91l-.84-.9.19-.45c.34-.79.39-.8,1-.31A9.4,9.4,0,0,1,13.8,2.33q-.18.34-.39.69Z" />
+                </svg>
+                <div class="app-name">
+                    <div class="app-name__company">RanchiMall</div>
+                    <h4 class="app-name__title">
+                        KYC Docs
+                    </h4>
+                </div>
+            </div>
+            <theme-toggle id="theme_toggle"></theme-toggle>
+            <button id="user_popup_button" class="hidden user-content button--small">
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon margin-right-0-5" height="24px" viewBox="0 0 24 24"
+                    width="24px" fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none" />
+                    <path
+                        d="M12 5.9c1.16 0 2.1.94 2.1 2.1s-.94 2.1-2.1 2.1S9.9 9.16 9.9 8s.94-2.1 2.1-2.1m0 9c2.97 0 6.1 1.46 6.1 2.1v1.1H5.9V17c0-.64 3.13-2.1 6.1-2.1M12 4C9.79 4 8 5.79 8 8s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 9c-2.67 0-8 1.34-8 4v3h16v-3c0-2.66-5.33-4-8-4z" />
+                </svg>
+                <div class="my-flo-id"></div>
+            </button>
+        </header>
+        <section class="flex flex-direction-column gap-0-5">
+            <label class="drag-drop-container" id="drag_drop_container">
+                <svg id="upload_icon" class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
+                    height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                    <g>
+                        <rect fill="none" height="24" width="24" />
+                    </g>
+                    <g>
+                        <g>
+                            <path
+                                d="M14,2H6C4.9,2,4.01,2.9,4.01,4L4,20c0,1.1,0.89,2,1.99,2H18c1.1,0,2-0.9,2-2V8L14,2z M18,20H6V4h7v5h5V20z M8,15.01 l1.41,1.41L11,14.84V19h2v-4.16l1.59,1.59L16,15.01L12.01,11L8,15.01z" />
+                        </g>
+                    </g>
+                </svg>
+                <h4 class="drag-drop-text">
+                    Drag & Drop file here or click to select
+                </h4>
+                <p>
+                    Max file size: 3MB
+                </p>
+                <input type="file" id="fileInput" style="display: none;" />
+            </label>
+            <div id="file_upload_section" class="flex align-center gap-1 space-between flex-wrap hidden">
+                <div class="flex align-center gap-0-5">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="#000000">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                            d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" />
+                    </svg>
+                    <h4 id="selected_file_name"></h4>
+                    <button class="button icon-only" onclick="clearFile()" title="Remove selected file">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                            width="24px" fill="#000000">
+                            <path d="M0 0h24v24H0V0z" fill="none" />
+                            <path
+                                d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z" />
+                        </svg>
+                    </button>
+                </div>
+                <button class="button button--primary flex-1" onclick="handleFileSelection()">Upload</button>
+            </div>
+        </section>
+    </article>
+    <script>
+        const drag_drop_container = document.getElementById('drag_drop_container');
+        const fileInput = document.getElementById('fileInput');
+        let selectedFile = null;
+        drag_drop_container.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            drag_drop_container.classList.add('drag-over');
+        });
+
+        drag_drop_container.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            drag_drop_container.classList.remove('drag-over');
+        });
+
+        drag_drop_container.addEventListener('drop', (e) => {
+            e.preventDefault();
+            drag_drop_container.classList.remove('drag-over');
+            selectedFile = e.dataTransfer.files[0];
+            handleFileSelection();
+        });
+        fileInput.addEventListener('change', (e) => {
+            e.preventDefault();
+            selectedFile = fileInput.files[0];
+            handleFileSelection();
+        });
+        function handleFileSelection() {
+            const maxSizeInBytes = 1024 * 1024 * 3; // 3MB
+            if (!selectedFile) {
+                notify('Please select a file.', 'error');
+                return;
+            }
+            // if (selectedFile.size > maxSizeInBytes) {
+            //     notify('File size should be less than 3MB', 'error');
+            //     return;
+            // }
+            document.getElementById('file_upload_section').classList.remove('hidden');
+            document.getElementById('selected_file_name').textContent = selectedFile.name;
+        }
+        function uploadFile() {
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                console.log(event.target.result);
+                const fileDataAsArrayBuffer = event.target.result;
+                const fileAsBlob = new Blob([fileDataAsArrayBuffer], { type: selectedFile.type });
+                floCloudAPI.uploadFile(fileAsBlob)
+                    .then(res => {
+                        console.log(res);
+                        notify('File uploaded successfully', 'success');
+                        clearFile();
+                    })
+                    .catch(err => {
+                        console.error(err)
+                        notify('Error uploading file', 'error');
+                    })
+            };
+
+            reader.readAsArrayBuffer(selectedFile);
+        }
+        function clearFile() {
+            fileInput.value = '';
+            document.getElementById('file_upload_section').classList.add('hidden');
+            selectedFile = null;
+        }
+    </script>
+
+</body>
+
+</html>
