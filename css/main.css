@@ -487,6 +487,37 @@ h3 {
   background-color: var(--accent-color);
 }
 
+.multi-state-button {
+  display: grid;
+  text-align: center;
+  align-items: center;
+  justify-items: center;
+}
+.multi-state-button > * {
+  grid-area: 1/1/2/2;
+}
+.multi-state-button button {
+  z-index: 1;
+  width: 100%;
+}
+
+.password-field label {
+  display: flex;
+  justify-content: center;
+}
+.password-field label input:checked ~ .visible {
+  display: none;
+}
+.password-field label input:not(:checked) ~ .invisible {
+  display: none;
+}
+
+#app_body {
+  display: grid;
+  height: 100%;
+  width: 100%;
+}
+
 #confirmation_popup,
 #prompt_popup {
   flex-direction: column;
@@ -537,6 +568,42 @@ h3 {
 #loading h4 {
   margin-top: 1.5rem;
   font-weight: 500;
+}
+
+#sign_in,
+#sign_up {
+  display: grid;
+  width: 100%;
+  justify-items: center;
+  align-content: center;
+  padding: 1.5rem;
+}
+#sign_in section,
+#sign_up section {
+  width: min(26rem, 100%);
+}
+#sign_in sm-form,
+#sign_up sm-form {
+  margin: 2rem 0;
+}
+
+.generated-keys-wrapper {
+  padding: 1rem;
+  background-color: rgba(var(--foreground-color), 1);
+  border-radius: 0.5rem;
+}
+
+#flo_id_warning {
+  padding-bottom: 1.5rem;
+}
+#flo_id_warning .icon {
+  height: 3rem;
+  width: 3rem;
+  padding: 0.8rem;
+  overflow: visible;
+  background-color: #ffc107;
+  border-radius: 3rem;
+  fill: rgba(0, 0, 0, 0.8);
 }
 
 #main_header {
