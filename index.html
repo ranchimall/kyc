@@ -68,7 +68,21 @@
             <button class="button button--danger justify-self-start" onclick="signOut()">Sign out</button>
         </section>
     </sm-popup>
+    <sm-popup id="view_file_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z" />
+                    <path
+                        d="M12 10.586l4.95-4.95 1.414 1.414-4.95 4.95 4.95 4.95-1.414 1.414-4.95-4.95-4.95 4.95-1.414-1.414 4.95-4.95-4.95-4.95L7.05 5.636z" />
+                </svg>
+            </button>
+            <h3>Process ID proof</h3>
+        </header>
+        <div id="view_file_popup__content" class="grid gap-1"></div>
+    </sm-popup>
     <script src="https://unpkg.com/uhtml@3.0.1/es.js"></script>
+    <script src="scripts/components.min.js"></script>
     <script src="scripts/lib.js"></script>
     <script src="scripts/floCrypto.js"></script>
     <script src="scripts/btcOperator.js"></script>
@@ -76,7 +90,6 @@
     <script src="scripts/compactIDB.js"></script>
     <script src="scripts/floCloudAPI.js"></script>
     <script src="scripts/floDapps.js"></script>
-    <script src="scripts/components.min.js"></script>
     <script src="scripts/main.js"></script>
     <script>
         const { html, render: renderElem } = uhtml;
@@ -487,16 +500,10 @@
                         <li class="kyc-request" .dataset=${{ requestVC: vectorClock, docVC: docVectorClock }}>
                             <time>${getFormattedTime(time)}</time>
                             <h4>${docTypeNames[docType]}</h4>
-                            <p>Uploaded by: <sm-copy value=${senderID}></sm-copy></p>
-                            <div class="flex gap-0-5">
-                                <div class="multi-state-button margin-right-auto">
-                                    <button class="button button--colored" onclick=${downloadFile}>Download</button>
-                                </div>
-                                <div class="multi-state-button">
-                                    <button class="button button--danger" onclick=${rejectKyc}>Reject</button>
-                                </div>
-                                <div class="multi-state-button">
-                                    <button class="button button--primary" onclick=${approveKyc}>Verify</button>
+                            <div class="flex space-between gap-1 flex-wrap align-end">
+                                <p>Uploaded by: <sm-copy value=${senderID}></sm-copy></p>
+                                <div class="multi-state-button margin-left-auto">
+                                    <button class="button button--primary" onclick=${viewFile}>Check ID proof</button>
                                 </div>
                             </div>
                         </li>
@@ -560,7 +567,7 @@
                                     </label>
                                     <div id="file_upload_section" class="grid gap-1 hidden card">
                                         <fieldset id="file_doc_type_selector">
-                                            <legend>Select Identity proof</legend>
+                                            <legend>Select ID proof</legend>
                                             <label class="interact">
                                                 <input type="radio" name="file_type" value="passport"/>
                                                 <span>Passport</span>
@@ -706,6 +713,59 @@
         function handleRequestFilter(e) {
 
         }
+        async function viewFile(e) {
+            const button = e.target.closest('button');
+            const { requestVC, docVC } = button.closest('li').dataset;
+            const { senderID, message: { docType } } = floDapps.getNextGeneralData('kycDocEntry', '0')[requestVC]
+            floGlobals.currentRequest = {
+                requestVC,
+                docVC,
+                senderID,
+                docType,
+            };
+            try {
+                buttonLoader(button, true)
+                const { file } = await floCloudAPI.downloadFile(docVC);
+                const blob = new Blob([file], { type: file.type });
+                const objectURL = URL.createObjectURL(blob);
+                const details = html`
+                    <div class="flex gap-1 space-between flex-wrap align-center">
+                        <h4>${senderID} (${docTypeNames[docType]})</h4>
+                        <div class="flex gap-0-5 margin-left-auto">
+                            <div class="multi-state-button">
+                                <button class="button button--danger" onclick=${rejectKyc}>Reject</button>
+                            </div>
+                            <div class="multi-state-button">
+                                <button class="button button--primary" onclick=${approveKyc}>Approve</button>
+                            </div>
+                        </div>
+                    </div>
+                `
+                if (file.type.includes('image')) {
+                    renderElem(getRef('view_file_popup__content'), html`
+                        ${details}
+                        <img src=${objectURL} alt=${`${senderID} ${docTypeNames[docType]}`}>
+                    `)
+                } else {
+                    renderElem(getRef('view_file_popup__content'), html`
+                        ${details}
+                        <object data=${objectURL} type="application/pdf" width="100%" height="600px">
+                            <p>Sorry, your browser doesn't support PDF viewing. You can download the file <a href=${objectURL} download=${`${senderID}-${docType}`}>here</a>.</p>
+                        </object>
+                    `)
+                }
+                openPopup('view_file_popup').closed.then(() => {
+                    URL.revokeObjectURL(objectURL);
+                    renderElem(getRef('view_file_popup__content'), '');
+                    floGlobals.currentRequest = null;
+                })
+            } catch (err) {
+                console.error(err)
+                notify('Error viewing file', 'error');
+            } finally {
+                buttonLoader(button, false)
+            }
+        }
         async function downloadFile(e) {
             const button = e.target.closest('button'); button
             const { requestVC, docVC } = button.closest('li').dataset;
@@ -734,7 +794,7 @@
             if (!confirmation) return;
             const button = e.target.closest('button');
             buttonLoader(button, true)
-            const { requestVC, docVC } = button.closest('li').dataset;
+            const { requestVC, docVC } = floGlobals.currentRequest;
             try {
                 await floCloudAPI.tagApplicationData(requestVC, 'verified')
                 await floCloudAPI.tagApplicationData(docVC, 'verified')
@@ -753,7 +813,7 @@
             if (!confirmation) return;
             const button = e.target.closest('button');
             buttonLoader(button, true)
-            const { requestVC, docVC } = button.closest('li').dataset;
+            const { requestVC, docVC } = floGlobals.currentRequest;
             try {
                 await floCloudAPI.noteApplicationData(requestVC, 'rejected')
                 notify('User rejected successfully', 'success');
@@ -812,9 +872,8 @@
                 floGlobals.isSubAdmin = floGlobals.subAdmins.includes(floGlobals.myFloID)
                 try {
                     if (floGlobals.isSubAdmin) {
-                        await floCloudAPI.requestGeneralData('kycDocEntry', {
-                            receiverID: floGlobals.myFloID,
-                        })
+                        // TODO: add subadmin specific requests
+                        await floCloudAPI.requestGeneralData('kycDocEntry')
                     } else[
                         await floCloudAPI.requestGeneralData('kycDocEntry', {
                             senderID: floGlobals.myFloID,

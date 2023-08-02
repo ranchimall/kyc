@@ -780,6 +780,14 @@ h3 {
   letter-spacing: 0.02em;
 }
 
+#view_file_popup .button {
+  padding: 0.5rem 1rem;
+}
+#view_file_popup img {
+  max-width: 100%;
+  max-height: 100%;
+}
+
 @media screen and (max-width: 40rem) {
   theme-toggle {
     order: 2;
@@ -798,6 +806,9 @@ h3 {
   }
   .popup__header {
     padding: 1.5rem 1.5rem 0 0.75rem;
+  }
+  #view_file_popup {
+    --width: min(56rem, 100%);
   }
 }
 @media (any-hover: hover) {
