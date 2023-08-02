@@ -15,7 +15,7 @@ body {
 }
 
 body {
-  --accent-color: #256eff;
+  --accent-color: #365eff;
   --text-color: 30, 30, 30;
   --background-color: 240, 240, 240;
   --foreground-color: 250, 250, 250;
@@ -633,30 +633,38 @@ h3 {
     margin-bottom: 1rem;
   }
 }
-.drag-drop-container,
-#file_upload_section {
+.card {
+  padding: 1.5rem;
   border-radius: 0.5rem;
   box-shadow: 0 0 0 1px rgba(var(--text-color), 0.1);
   background-color: rgba(var(--foreground-color), 1);
   transition: box-shadow 0.2s, background-color 0.2s;
 }
 .drag-drop-container {
-  padding: max(3rem, 6vw) 1.5rem;
   text-align: center;
   cursor: pointer;
   align-items: center;
   justify-items: center;
+  padding: 3vw 1rem;
   &.drag-over,
   &:hover {
     box-shadow: 0 0 0 0.1rem var(--accent-color);
   }
   .drag-drop-text {
+    font-size: 1.1rem;
     color: rgba(var(--text-color), 0.9);
   }
 
   p {
     max-width: 100%;
     color: rgba(var(--text-color), 0.6);
+  }
+  strong {
+    font-weight: 500;
+    color: rgba(var(--text-color), 0.8);
+    background-color: rgba(var(--text-color), 0.06);
+    border-radius: 3rem;
+    padding: 0.1rem 0.8rem;
   }
 }
 #upload_icon {
@@ -671,7 +679,6 @@ h3 {
 }
 
 #file_upload_section {
-  padding: 1.5rem;
   margin-bottom: 3rem;
   fieldset {
     padding: 0.5rem;
@@ -704,6 +711,30 @@ h3 {
   time {
     font-size: 0.9rem;
     color: rgba(var(--text-color), 0.8);
+  }
+}
+
+.kyc-request {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(var(--foreground-color), 1);
+  time {
+    font-size: 0.9rem;
+    color: rgba(var(--text-color), 0.8);
+  }
+  h4 {
+    font-size: 1.1rem;
+  }
+  sm-copy {
+    font-weight: 500;
+  }
+  button {
+    text-transform: uppercase;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
   }
 }
 @media screen and (max-width: 40rem) {
