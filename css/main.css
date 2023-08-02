@@ -656,7 +656,7 @@ h3 {
 #user_popup_button {
   background-color: rgba(var(--text-color), 0.06);
   border-radius: 2rem;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   text-overflow: ellipsis;
   overflow: hidden;
 }
@@ -686,7 +686,7 @@ h3 {
   cursor: pointer;
   align-items: center;
   justify-items: center;
-  padding: 3vw 1rem;
+  padding: 3vmax 1rem;
 }
 .drag-drop-container.drag-over, .drag-drop-container:hover {
   box-shadow: 0 0 0 0.1rem var(--accent-color);
