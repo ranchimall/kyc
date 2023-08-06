@@ -1,9 +1,13 @@
+function checkIfSentByMasterAddress(tx) {
+    return tx.vin.some(vin => vin.addresses[0] === floGlobals.masterAddress);
+}
+
 function getApprovedAggregators() {
     floGlobals.approvedKycAggregators = {};
     return new Promise((resolve, reject) => {
         floBlockchainAPI.readAllTxs(floGlobals.masterAddress).then(({ items: transactions }) => {
             console.log(transactions);
-            transactions.filter(tx => floCrypto.isSameAddr(tx.vin[0].addr, floGlobals.masterAddress) && tx.floData.startsWith('KYC'))
+            transactions.filter(tx => checkIfSentByMasterAddress(tx) && tx.floData.startsWith('KYC'))
                 .reverse()
                 .forEach(tx => {
                     const { floData, time } = tx;
@@ -43,7 +47,7 @@ function getApprovedKycs() {
             resolve();
         Promise.all(aggregatorTxs).then(aggregatorData => {
             aggregatorData = aggregatorData.flat(1)
-                .filter(tx => tx.vin[0].addr in floGlobals.approvedKycAggregators && tx.floData.startsWith('KYC'))
+                .filter(tx => tx.vin[0].addresses[0] in floGlobals.approvedKycAggregators && tx.floData.startsWith('KYC'))
                 .sort((a, b) => a.time - b.time);
             for (const tx of aggregatorData) {
                 const { floData, time, vin, vout } = tx;
@@ -54,7 +58,7 @@ function getApprovedKycs() {
                             floGlobals.approvedKyc[address] = {
                                 validFrom: time * 1000,
                                 validTo: validity || Date.now() + 10000000,
-                                issuedBy: vin[0].addr
+                                issuedBy: vin[0].addresses[0]
                             };
                         });
                         break;
@@ -62,7 +66,7 @@ function getApprovedKycs() {
                         operationData.split('+').forEach(address => {
                             if (!floGlobals.approvedKyc[address]) return
                             floGlobals.approvedKyc[address].validTo = time * 1000;
-                            floGlobals.approvedKyc[address].revokedBy = vin[0].addr;
+                            floGlobals.approvedKyc[address].revokedBy = vin[0].addresses[0];
                         });
                         break;
                     default:
