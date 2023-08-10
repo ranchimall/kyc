@@ -628,12 +628,14 @@
                 let isVerified = false;
                 let concurrentRequests = 0;
                 const requests = floDapps.getNextGeneralData('userKycRequests', '0');
+                let hasUploaded = {}
                 const renderedRequests = Object.keys(requests).reverse().map((key) => {
                     const { time, tag, message: { docType } } = requests[key];
                     if (!isVerified && tag === 'verified')
                         isVerified = true;
                     if (!tag) {
                         concurrentRequests++;
+                        hasUploaded[docType] = true;
                     }
                     return html`
                         <li class="verification-item">
@@ -650,7 +652,7 @@
                         </li>
                     `;
                 });
-                return [renderedRequests, concurrentRequests, isVerified];
+                return { renderedRequests, concurrentRequests, isVerified, hasUploaded };
             }
         }
         let userAddressTimeInterval;
@@ -728,7 +730,7 @@
                         </label>
                     `;
                 });
-                const [renderedRequests, concurrentRequests, isVerified] = render.userRequests()
+                const { renderedRequests, concurrentRequests, isVerified, hasUploaded } = render.userRequests()
                 const fileUploadSection = html`
                     <section class="flex flex-direction-column gap-0-5">
                         <h3 class="text-center" style="margin-bottom: 1rem">Upload document for KYC verification</h3>
@@ -748,18 +750,12 @@
                         <div id="file_upload_section" class="grid gap-1 hidden card">
                             <fieldset id="file_doc_type_selector">
                                 <legend>Select ID proof</legend>
-                                <label class="interact">
-                                    <input type="radio" name="file_type" value="passport"/>
-                                    <span>Passport</span>
-                                </label>
-                                <label class="interact">
-                                    <input type="radio" name="file_type" value="driving_license"/>
-                                    <span>Driving License</span>
-                                </label>
-                                <label class="interact">
-                                    <input type="radio" name="file_type" value="aadhaar"/>
-                                    <span>Aadhaar Card</span>
-                                </label>
+                                ${Object.keys(docTypeNames).map((docType) => hasUploaded[docType] ? html`` : html`
+                                    <label class="interact">
+                                        <input type="radio" name="file_type" value="${docType}"/>
+                                        <span>${docTypeNames[docType]}</span>
+                                    </label>
+                                `)}
                             </fieldset>
                             <fieldset id="issuer_selector">
                                 <legend>Select KYC verifier</legend>
