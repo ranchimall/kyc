@@ -75,7 +75,7 @@ button,
   font-size: inherit;
   font-weight: 500;
   white-space: nowrap;
-  padding: 0.9rem;
+  padding: 0.6rem 0.9rem;
   border-radius: 0.3rem;
   justify-content: center;
   &:focus-visible {
@@ -252,7 +252,7 @@ input[type="radio"] {
   text-overflow: ellipsis;
 }
 
-.breakable {
+.wrap-around {
   overflow-wrap: break-word;
   word-wrap: break-word;
   word-break: break-word;
@@ -737,6 +737,33 @@ h3 {
     letter-spacing: 0.02em;
   }
 }
+.revoke-card {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(var(--foreground-color), 1);
+  label {
+    gap: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  input {
+    accent-color: var(--accent-color);
+    height: 1.3em;
+    width: 1.3em;
+  }
+  span:last-of-type {
+    font-size: 0.9rem;
+    color: rgba(var(--text-color), 0.8);
+    font-weight: 400;
+  }
+  .button {
+    padding: 0.5rem 1rem;
+  }
+}
 #view_file_popup {
   .button {
     padding: 0.5rem 1rem;
@@ -818,12 +845,11 @@ h3 {
   border-radius: 2rem;
   background-color: rgba(var(--text-color), 0.1);
   overflow: hidden;
-  &::after {
-    content: "";
+  &__bar {
     position: absolute;
     top: 0;
     left: 0;
-    width: var(--value);
+    width: 0;
     height: 100%;
     background-color: var(--accent-color);
     transition: width 0.3s ease-in-out;
