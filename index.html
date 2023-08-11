@@ -206,33 +206,37 @@
                 this.routes[route] = callback
             }
             async routeTo(path) {
-                let page
-                let wildcards = []
-                let queryString
-                let params
-                [path, queryString] = path.split('?');
-                if (path.includes('#'))
-                    path = path.split('#')[1];
-                if (path.includes('/'))
-                    [, page, ...wildcards] = path.split('/')
-                else
-                    page = path
-                this.state = { page, wildcards }
-                if (queryString) {
-                    params = new URLSearchParams(queryString)
-                    this.state.params = Object.fromEntries(params)
-                }
-                if (this.routingStart) {
-                    this.routingStart(this.state)
-                }
-                if (this.routes[page]) {
-                    await this.routes[page](this.state)
-                    this.state.lastPage = page
-                } else {
-                    this.routes['404'](this.state)
-                }
-                if (this.routingEnd) {
-                    this.routingEnd(this.state)
+                try {
+                    let page
+                    let wildcards = []
+                    let queryString
+                    let params
+                    [path, queryString] = path.split('?');
+                    if (path.includes('#'))
+                        path = path.split('#')[1];
+                    if (path.includes('/'))
+                        [, page, ...wildcards] = path.split('/')
+                    else
+                        page = path
+                    this.state = { page, wildcards }
+                    if (queryString) {
+                        params = new URLSearchParams(queryString)
+                        this.state.params = Object.fromEntries(params)
+                    }
+                    if (this.routingStart) {
+                        this.routingStart(this.state)
+                    }
+                    if (this.routes[page]) {
+                        await this.routes[page](this.state)
+                        this.state.lastPage = page
+                    } else {
+                        this.routes['404'](this.state)
+                    }
+                    if (this.routingEnd) {
+                        this.routingEnd(this.state)
+                    }
+                } catch (e) {
+                    console.error(e)
                 }
             }
         }
@@ -330,7 +334,6 @@
                         clipPath: 'circle(100%)',
                     },
                 ], animOptions).onfinish = () => {
-                    button.getAnimations().forEach(anim => anim.cancel())
                     const potentialTarget = button.parentNode.querySelector('sm-spinner')
                     if (potentialTarget) potentialTarget.remove();
                 }
@@ -376,6 +379,7 @@
                     history.scrollRestoration = "manual";
                 }
                 window.scrollTo(0, 0);
+                renderElem(getRef('app_body'), html``);
             },
             routingEnd() {
                 document.querySelectorAll(".my-flo-address").forEach(elem => {
@@ -474,10 +478,16 @@
             'driving_license': 'Driving License',
         }
         const btcAddresses = {}
+        const floAddresses = {}
         function getBtcAddress(floAddress) {
             if (!btcAddresses[floAddress])
                 btcAddresses[floAddress] = btcOperator.convert.legacy2bech(floAddress)
             return btcAddresses[floAddress]
+        }
+        function getFloAddress(btcAddress) {
+            if (!floAddresses[btcAddress])
+                floAddresses[btcAddress] = floCrypto.toFloID(btcAddress)
+            return floAddresses[btcAddress]
         }
         const render = {
             approvedKycAddresses() {
@@ -487,7 +497,7 @@
                 renderElem(getRef('approved_addresses'), html`${approvedKycAddresses}`)
             },
             approvedAggregatorCard(address) {
-                const floID = floCrypto.toFloID(address)
+                const floID = getFloAddress(address)
                 const btcID = getBtcAddress(floID)
                 return html`
                     <li class="revoke-card" data-address=${btcID} data-search-key=${`${floGlobals.approvedKycAggregators[address]}-${btcID}-${floID}`}>
@@ -510,8 +520,9 @@
                 renderElem(getRef('approved_addresses'), html`${approvedAggregators}`)
             },
             pendingKycRequest(request) {
-                console.log(request)
                 const { senderID, time, files } = request;
+                const floAddress = getFloAddress(senderID)
+                const btcAddress = getBtcAddress(floAddress)
                 const fileButtons = files.map(file => {
                     const { message: { docType, docVectorClock }, vectorClock } = file;
                     return html`
@@ -527,18 +538,19 @@
                         <time>${getFormattedTime(time)}</time>
                         <div class="grid">
                             <p>BTC Address</p>
-                            <sm-copy value=${getBtcAddress(senderID)}></sm-copy>
+                            <sm-copy value=${btcAddress}></sm-copy>
                         </div>
                         <div class="grid">
                             <p>FLO Address</p>
-                            <sm-copy value=${senderID}></sm-copy>
+                            <sm-copy value=${floAddress}></sm-copy>
                         </div>
                         <div class="flex gap-1 flex-wrap">${fileButtons}</div>
                     </li>`
             },
             approvedKycRequest(request) {
                 const { senderID, time, files } = request;
-                const btcID = getBtcAddress(senderID)
+                const floAddress = getFloAddress(senderID)
+                const btcAddress = getBtcAddress(floAddress)
                 const fileButtons = files.map(file => {
                     const { message: { docType, docVectorClock }, vectorClock } = file;
                     return html`
@@ -550,12 +562,12 @@
                     `
                 })
                 return html`
-                    <li class="revoke-card" .dataset=${{ address: senderID, requestVC: vectorClock, docVC: docVectorClock }}>
+                    <li class="revoke-card" .dataset=${{ address: floAddress, requestVC: vectorClock, docVC: docVectorClock }}>
                         <label class="flex align-center">
-                            <input type="checkbox" value=${senderID}/>
+                            <input type="checkbox" value=${floAddress}/>
                             <div class="grid gap-0-3">
-                                <span class="wrap-around">BTC: ${btcID}</span>
-                                <span class="wrap-around">FLO: ${senderID}</span>
+                                <span class="wrap-around">BTC: ${btcAddress}</span>
+                                <span class="wrap-around">FLO: ${floAddress}</span>
                             </div>
                         </label>
                         <div class="flex gap-1 flex-wrap">${fileButtons}</div>
@@ -563,65 +575,78 @@
                 `
             },
             rejectedKycRequest(request) {
-                const { senderID, time, message: { docType, docVectorClock }, vectorClock } = request;
-                const btcID = getBtcAddress(senderID)
+                const { senderID, time, files } = request;
+                const floAddress = getFloAddress(senderID)
+                const btcAddress = getBtcAddress(floAddress)
                 return html`
-                    <li class="kyc-request" .dataset=${{ requestVC: vectorClock, docVC: docVectorClock }}>
-                        <time>${getFormattedTime(time)}</time>
-                        <h4>${docTypeNames[docType]}</h4>
+                    <li class="kyc-request">
+                        <div class="flex space-between gap-1 space-between">
+                            <time>${getFormattedTime(time)}</time>
+                            <div class="flex gap-0-3 align-center">
+                                <svg class="icon"style="fill: var(--danger-color)" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg>
+                                <b>Rejected</b>
+                            </div>
+                        </div>
                         <div class="grid gap-1">
                             <div class="grid gap-0-3">
                                 <p>FLO address</p>
-                                <sm-copy value=${senderID}></sm-copy>
+                                <sm-copy value=${floAddress}></sm-copy>
                             </div>
                             <div class="grid gap-0-3">
                                 <p>BTC address</p>
-                                <sm-copy value=${btcID}></sm-copy>
+                                <sm-copy value=${btcAddress}></sm-copy>
                             </div>
                         </div>
                     </li>`
             },
             kycRequests(options = {}) {
-                const { status, address } = options;
+                const { status = 'pending', address } = options;
                 const kycRequests = floDapps.getNextGeneralData('userKycRequests', '0');
                 const filteredRequests = {};
+                // group requests by senderID
                 for (const [key, request] of Object.entries(kycRequests)) {
-                    const { message, senderID, time, tag, vectorClock } = request;
-                    if (!filteredRequests[senderID]) {
-                        filteredRequests[senderID] = {
+                    const { message, senderID, time, tag, vectorClock, note } = request;
+                    const floAddress = getFloAddress(senderID)
+                    if (!filteredRequests[floAddress]) {
+                        filteredRequests[floAddress] = {
                             time,
                             tag: tag === 'approved' ? 'approved' : tag,
-                            files: []
+                            files: [],
+                            note
                         };
                     }
-                    filteredRequests[senderID].files.push({ message, vectorClock });
+                    filteredRequests[floAddress].files.push({ message, vectorClock });
                 }
-                const result = [];
-                for (const [senderID, request] of Object.entries(filteredRequests)) {
-                    const { time, tag, files } = request;
+                const result = []
+                Object.entries(filteredRequests).forEach(([senderID, request]) => {
+                    const { time, tag, files, note } = request;
+                    const floAddress = getFloAddress(senderID)
                     if (status) {
-                        if (status === 'approved' && tag !== 'approved') continue;
-                        if (status === 'rejected' && tag !== 'rejected') continue;
-                        if (status === 'pending' && tag) continue;
+                        switch (status) {
+                            case 'approved':
+                                if (tag !== 'approved') return;
+                                break;
+                            case 'rejected':
+                                if (note !== 'rejected') return;
+                                break;
+                            case 'pending':
+                                if (tag || note) return;
+                                break;
+                        }
                     }
                     if (address) {
-                        const equivalentBtcAddress = getBtcAddress(senderID);
-                        const senderAddress = senderID.toLowerCase();
                         const query = address.toLowerCase();
-                        if (!senderAddress.includes(query) && !equivalentBtcAddress.includes(query)) continue;
+                        if (!floAddress.toLowerCase().includes(query) && !getBtcAddress(floAddress).toLowerCase().includes(query)) return;
                     }
-                    switch (tag) {
+                    switch (tag || note) {
                         case 'approved':
-                            result.push(render.approvedKycRequest({ senderID, time, tag, files }));
-                            break;
+                            return result.push(render.approvedKycRequest({ senderID: floAddress, time, tag, files }));
                         case 'rejected':
-                            result.push(render.rejectedKycRequest({ senderID, time, tag, files }));
-                            break;
+                            return result.push(render.rejectedKycRequest({ senderID: floAddress, time, tag, files }));
                         default:
-                            result.push(render.pendingKycRequest({ senderID, time, tag, files }));
-                            break;
+                            return result.push(render.pendingKycRequest({ senderID: floAddress, time, tag, files }));
                     }
-                }
+                })
                 return result.reverse();
             },
             userRequests() {
@@ -656,7 +681,8 @@
             }
         }
         let userAddressTimeInterval;
-        function renderHome() {
+        function renderHome(appState) {
+            const { params: { filter = 'pending', search } = {} } = appState || {};
             const mainHeader = html`
                 <header id="main_header">
                     <div class="app-brand margin-right-auto hide-on-small">
@@ -675,7 +701,7 @@
                     </button>
                 </header>
             `;
-            const renderedKycRequests = render.kycRequests();
+            const renderedKycRequests = render.kycRequests({ status: filter, address: search });
             if (floGlobals.isSubAdmin) {
                 renderElem(getRef('app_body'), html`
                     <article id="home_page">
@@ -684,10 +710,10 @@
                             <div id="kyc_requests_header" class="flex align-center space-between gap-1 flex-wrap">
                                 <h3>KYC requests</h3>
                                 <sm-chips id="kyc_request_filter" onchange=${handleRequestFilter}>
-                                    <sm-chip value="pending" selected>Pending</sm-chip>
-                                    <sm-chip value="rejected">Rejected</sm-chip>
-                                    <sm-chip value="approved">Approved</sm-chip>
-                                    <sm-chip value="all">All</sm-chip>
+                                    <sm-chip value="pending" ?selected=${filter === "pending"}>Pending</sm-chip>
+                                    <sm-chip value="rejected" ?selected=${filter === "rejected"}>Rejected</sm-chip>
+                                    <sm-chip value="approved" ?selected=${filter === "approved"}>Approved</sm-chip>
+                                    <sm-chip value="all" ?selected=${filter === "all"}>All</sm-chip>
                                 </sm-chips>
                             </div>
                             <sm-input id="search_approved" type="search" placeholder="Search address" oninput=${handleRequestSearch}>
@@ -798,10 +824,13 @@
                     <article id="home_page">
                         ${mainHeader}
                         ${issuersList.length ? html`
-                                ${isVerified ? html`${kycCompleteSection}` : html`${concurrentRequests < 100 ? fileUploadSection : tooManyRequestsSection}`}
+                                ${isVerified ? html`${kycCompleteSection}` : html`${concurrentRequests < 4 ? fileUploadSection : tooManyRequestsSection}`}
                                 ${renderedRequests.length ? html`
                                     <section class="grid gap-1">
-                                        <h4>KYC requests</h4>
+                                        <div class="grid gap-0-3">
+                                            <h4>KYC requests</h4>
+                                            <p>May take up to 48 hours to process requests</p>
+                                        </div>
                                         <ul id="verification_list" class="grid gap-0-5">${renderedRequests}</ul>
                                     </section>        
                                 `: ''}
@@ -935,36 +964,42 @@
         // subAdmin functions
         function handleRequestFilter(e) {
             const filter = e.target.value;
-            const renderedKycRequests = render.kycRequests({ status: filter });
-            renderElem(getRef('kyc_requests_list'), html`
-                ${renderedKycRequests?.length ? renderedKycRequests : html`<li class="text-center" style="padding: 3rem;">No requests found</li>`}                
-            `)
+            location.hash = `#/home?filter=${filter}`
         }
         function handleRequestSearch(e) {
             const filter = getRef('kyc_request_filter').value;
             const searchKey = e.target.value.toLowerCase()
-            const renderedKycRequests = render.kycRequests({ address: searchKey, status: filter });
-            renderElem(getRef('kyc_requests_list'), html`
-                ${renderedKycRequests?.length ? renderedKycRequests : html`<li class="text-center" style="padding: 3rem;">No requests found</li>`}                
-            `)
+            router.routeTo(`#/home?filter=${filter}&search=${searchKey}`)
         }
         async function viewFile(e) {
             const button = e.target;
             const { requestVC, docVC } = button.dataset;
             const { senderID, message: { docType }, tag } = floDapps.getNextGeneralData('userKycRequests', '0')[requestVC]
+            const floAddress = getFloAddress(senderID);
             floGlobals.currentRequest = {
                 requestVC,
                 docVC,
-                senderID,
+                senderID: floAddress,
                 docType,
             };
             try {
-                buttonLoader(button, true)
+                let objectURL
+                renderElem(getRef('view_file_popup__content'), html`
+                    <div class="grid gap-1 justify-items-center text-center">
+                        <sm-spinner></sm-spinner>
+                        <h4>Loading ${senderID} ${docTypeNames[docType]}</h4>
+                    </div>
+                `)
+                openPopup('view_file_popup').closed.then(() => {
+                    URL.revokeObjectURL(objectURL);
+                    renderElem(getRef('view_file_popup__content'), html``);
+                    floGlobals.currentRequest = null;
+                })
                 const { file } = await floCloudAPI.downloadFile(docVC, {
                     decrypt: await floDapps.user.private,
                 });
                 const blob = new Blob([file], { type: file.type });
-                const objectURL = URL.createObjectURL(blob);
+                objectURL = URL.createObjectURL(blob);
                 const details = html`
                     <div class="flex gap-1 space-between flex-wrap align-center">
                         <h4>${senderID} (${docTypeNames[docType]})</h4>
@@ -993,16 +1028,9 @@
                         </object>
                     `)
                 }
-                openPopup('view_file_popup').closed.then(() => {
-                    URL.revokeObjectURL(objectURL);
-                    renderElem(getRef('view_file_popup__content'), '');
-                    floGlobals.currentRequest = null;
-                })
             } catch (err) {
                 console.error(err)
                 notify('Error viewing file', 'error');
-            } finally {
-                buttonLoader(button, false)
             }
         }
         async function downloadFile(e) {
@@ -1026,24 +1054,16 @@
                 buttonLoader(button, false)
             }
         }
+        floGlobals.approvalsToBeCommitted = new Map();
         async function approveKyc(e) {
-            const confirmation = await getConfirmation('Are you sure you want to verify this user?', {
-                confirmText: 'Verify',
-            });
-            if (!confirmation) return;
             const button = e.target.closest('button');
-            buttonLoader(button, true)
-            const { requestVC, docVC } = floGlobals.currentRequest;
-            try {
-                await floCloudAPI.tagApplicationData(requestVC, 'verified')
-                await floCloudAPI.tagApplicationData(docVC, 'verified')
-                notify('User verified successfully', 'success');
-            } catch (err) {
-                console.error(err)
-                notify('Error verifying user', 'error');
-            } finally {
-                buttonLoader(button, false)
-            }
+            const { requestVC, docVC, senderID } = floGlobals.currentRequest;
+            floGlobals.approvalsToBeCommitted.set(senderID, {
+                requestVC,
+                docVC,
+            })
+            closePopup()
+            floGlobals.currentRequest = null;
         }
         async function rejectKyc(e) {
             const confirmation = await getConfirmation('Are you sure you want to reject this user?', {
@@ -1054,8 +1074,11 @@
             buttonLoader(button, true)
             const { requestVC, docVC } = floGlobals.currentRequest;
             try {
-                await floCloudAPI.noteApplicationData(requestVC, 'rejected')
+                // await floCloudAPI.noteApplicationData(requestVC, 'rejected')
+                floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].note = 'rejected'
                 notify('User rejected successfully', 'success');
+                closePopup()
+                renderHome()
             } catch (err) {
                 console.error(err)
                 notify('Error rejecting user', 'error');
@@ -1115,54 +1138,16 @@
                 getRef('aggregator_balance').classList.add('hidden')
             }
         }
-        function processAddresses(addresses = []) {
-            const uniqueAddresses = new Set()
-            addresses.forEach(address => {
-                let equivalentBtcAddress = address
-                if (floCrypto.validateFloID(address))
-                    equivalentBtcAddress = getBtcAddress(address)
-                uniqueAddresses.add(equivalentBtcAddress)
-            })
-            return [...uniqueAddresses]
-        }
-        function approveAddresses() {
-            const manageType = getRef('manage_type').value
-            const approverPrivateKey = getRef('approver_private_key').value.trim()
-            if (!approverPrivateKey) {
-                return notify(`Enter ${manageType} private key`, 'error')
+        async function approveAddresses() {
+            const approverPrivateKey = await floDapps.user.private
+            if (!floGlobals.isSubAdmin) {
+                return notify('You are not authorized to approve KYC', 'error')
             }
-            const approverAddress = floCrypto.getFloID(approverPrivateKey)
-            if (manageType === 'aggregator') {
-                if (!floGlobals.approvedKycAggregators.hasOwnProperty(approverAddress)) {
-                    return notify('KYC aggregator address is not approved', 'error')
-                }
-            } else {
-                if (floGlobals.masterAddress !== approverAddress) {
-                    return notify(`Private key doesn't match admin`, 'error')
-                }
-            }
-            const addressInputs = [...document.querySelectorAll('.kyc-address')]
-                .filter(input => input.value.trim() !== '')
-                .map(input => input.value.trim())
-            let addressLabels = []
-            if (manageType === 'admin') {
-                addressLabels = [...document.querySelectorAll('.aggregator-label')]
-                    .filter(input => input.value.trim() !== '')
-                    .map(input => input.value.trim())
-            }
-            const addresses = processAddresses(addressInputs)
-            if (addresses.length === 0) {
+            if (floGlobals.approvalsToBeCommitted.size === 0) {
                 return notify('Enter at least one address to approve', 'error')
             }
-            let floData
-            if (manageType === 'aggregator')
-                floData = `KYC|APPROVE_KYC|${addresses.join('+')}`
-            else {
-                const addressWithLabels = addresses.map((address, index) => {
-                    return `${address}:${addressLabels[index]}`
-                })
-                floData = `KYC|APPROVE_AGGREGATOR|${addressWithLabels.join('+')}`
-            }
+            const addresses = [...floGlobals.approvalsToBeCommitted.keys()]
+            let floData = `KYC|APPROVE_KYC|${addresses.join('+')}`
             console.log(floData)
             if (floData.length > 1040) {
                 return notify('Too many addresses. Try removing one and resubmitting.', 'error')
@@ -1184,12 +1169,20 @@
                     }, 1000)
                 })
             })
+            // try {
+            //     await floCloudAPI.tagApplicationData(requestVC, 'verified')
+            //     await floCloudAPI.tagApplicationData(docVC, 'verified')
+            //     notify('User verified successfully', 'success');
+            // } catch (err) {
+            //     console.error(err)
+            //     notify('Error verifying user', 'error');
+            // }
         }
         async function revokeKycs() {
             try {
                 const approverPrivateKey = await floDapps.user.private
                 if (!floGlobals.isSubAdmin) {
-                    return notify('You are not authorized to approve KYC', 'error')
+                    return notify('You are not authorized to revoke KYC', 'error')
                 }
                 if (addressesToRevoke.size === 0) {
                     return notify('Select at least one address to revoke', 'error')
@@ -1272,8 +1265,8 @@
             floDapps.launchStartUp().then(async result => {
                 console.log(result)
                 //App functions....
-                floGlobals.myFloID = floCrypto.toFloID(myFloID);
-                floGlobals.myBtcID = getBtcAddress(myFloID)
+                floGlobals.myFloID = getFloAddress(floDapps.user.id);
+                floGlobals.myBtcID = getBtcAddress(floGlobals.myFloID)
                 floGlobals.isSubAdmin = floGlobals.subAdmins.includes(floGlobals.myFloID)
                 try {
                     await floCloudAPI.requestObjectData('kycDocs')
@@ -1310,7 +1303,7 @@
                     } else[
                         // fetch user's kyc requests
                         await floCloudAPI.requestGeneralData('userKycRequests', {
-                            senderID: floGlobals.myFloID,
+                            senderID: [floGlobals.myFloID, floGlobals.myBtcID],
                         })
                     ]
                     if (['#/landing', '#/sign_in', '#/sign_up'].includes(window.location.hash)) {

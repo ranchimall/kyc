@@ -396,8 +396,12 @@ h3 {
   justify-content: start;
 }
 
-.justify-center {
+.justify-content-center {
   justify-content: center;
+}
+
+.justify-items-center {
+  justify-items: center;
 }
 
 .justify-right {
