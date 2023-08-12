@@ -657,6 +657,78 @@ h3 {
   color: rgba(var(--text-color), 0.8);
 }
 
+#kyc_status {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 100%;
+  padding-bottom: 2rem;
+}
+#kyc_status header {
+  margin-bottom: 3rem;
+}
+#kyc_status sm-input {
+  font-weight: 500;
+  font-size: 1rem;
+}
+#kyc_status .icon-only {
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 0.5rem;
+}
+#kyc_status > *:not(:first-child) {
+  margin: 0 auto;
+  width: min(100% - 2rem, 40rem);
+}
+
+#search_illustration {
+  height: 12rem;
+  justify-self: center;
+  align-self: center;
+  margin-bottom: 1rem;
+  flex-shrink: 0;
+}
+
+#verification_result {
+  display: grid;
+  gap: 1rem;
+  background-color: rgba(var(--text-color), 0.05);
+  border-radius: 0.5rem;
+  padding: max(1rem, 2vw);
+  line-height: 1.7;
+  width: 100%;
+}
+#verification_result:empty {
+  display: none;
+}
+#verification_result .icon {
+  width: 3rem;
+  height: 3rem;
+}
+#verification_result[data-status=valid] .icon {
+  fill: var(--green);
+}
+#verification_result[data-status=invalid] .icon {
+  fill: var(--danger-color);
+}
+
+.info {
+  font-size: 0.9rem;
+  color: rgba(var(--text-color), 0.8);
+  gap: 0.3rem 1.5rem;
+}
+.info > :first-child {
+  font-weight: 500;
+  min-width: 5rem;
+  text-align: end;
+}
+.info:last-child {
+  text-align: start;
+}
+.info sm-copy {
+  font-weight: 500;
+}
+
 #user_popup_button {
   background-color: rgba(var(--text-color), 0.06);
   border-radius: 2rem;
@@ -820,6 +892,64 @@ h3 {
   max-height: 100%;
 }
 
+#commit_approvals {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  border-radius: 0.5rem;
+  margin: 1rem;
+  padding: 1rem 1.2rem;
+}
+#commit_approvals[data-count="0"] {
+  display: none;
+}
+#commit_approvals::after {
+  content: attr(data-count);
+  display: flex;
+  margin-left: 0.5rem;
+  background-color: rgba(var(--background-color), 1);
+  color: rgba(var(--text-color), 1);
+  font-size: 0.9rem;
+  font-weight: 500;
+  height: 1.2rem;
+  min-width: 1.2rem;
+  padding: 0.2rem;
+  line-height: 1;
+  border-radius: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  -webkit-animation: pulse 0.5s infinite alternate;
+          animation: pulse 0.5s infinite alternate;
+}
+
+#commit_approvals_popup {
+  --width: min(32rem, 100%);
+}
+
+.kyc-to-commit {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background-color: rgba(var(--foreground-color), 1);
+  justify-items: flex-start;
+}
+
+@-webkit-keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.15);
+  }
+}
 @media screen and (max-width: 40rem) {
   theme-toggle {
     order: 2;
@@ -833,6 +963,9 @@ h3 {
   }
 }
 @media screen and (min-width: 64rem) {
+  h1 {
+    font-size: 3vw;
+  }
   sm-popup {
     --width: 24rem;
   }
