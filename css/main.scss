@@ -17,8 +17,8 @@ body {
 body {
   --accent-color: #365eff;
   --text-color: 30, 30, 30;
-  --background-color: 240, 240, 240;
-  --foreground-color: 250, 250, 250;
+  --background-color: 248, 248, 248;
+  --foreground-color: 255, 255, 255;
   --danger-color: rgb(255, 75, 75);
   --green: #1cad59;
   scrollbar-width: thin;
@@ -897,6 +897,11 @@ h3 {
     transform: scale(1.15);
   }
 }
+
+#verifiers_section {
+  width: min(100%, 40rem);
+}
+
 @media screen and (max-width: 40rem) {
   theme-toggle {
     order: 2;
@@ -922,6 +927,9 @@ h3 {
   }
   #view_file_popup {
     --width: min(56rem, 100%);
+  }
+  #approve_verifier_popup {
+    --width: min(32rem, 100%);
   }
 }
 @media (any-hover: hover) {
