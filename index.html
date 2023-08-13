@@ -604,7 +604,7 @@
             const kycRequests = getUserKycRequests();
             const verifiedRequest = Object.values(kycRequests).find(request => {
                 const wasSentByAddress = request.senderID === floAddress || request.senderID === btcAddress
-                const isApproved = request.tag.includes('approved')
+                const isApproved = request.tag?.includes('approved')
                 return wasSentByAddress && isApproved
             });
             getRef('verification_result').classList.remove('hidden');
@@ -791,7 +791,7 @@
                     if (status) {
                         switch (status) {
                             case 'approved':
-                                if (!tag.includes('approved') && !floGlobals.approvalsToBeCommitted.has(floAddress)) return;
+                                if (!tag?.includes('approved') && !floGlobals.approvalsToBeCommitted.has(floAddress)) return;
                                 break;
                             case 'rejected':
                                 if (note !== 'rejected') return;
@@ -823,7 +823,7 @@
                 let hasUploaded = {}
                 const renderedRequests = Object.keys(requests).map((key) => {
                     const { time, tag, message: { docType } } = requests[key];
-                    if (!isVerified && tag.includes('approved'))
+                    if (!isVerified && tag?.includes('approved'))
                         isVerified = true;
                     if (!tag) {
                         concurrentRequests++;
