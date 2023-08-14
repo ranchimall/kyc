@@ -685,8 +685,8 @@ h3 {
   height: 12rem;
   justify-self: center;
   align-self: center;
-  margin-bottom: 1rem;
   flex-shrink: 0;
+  padding: 2rem 0;
 }
 
 #verification_result {
