@@ -259,6 +259,7 @@
                 this.state = state
                 this.routingStart = routingStart
                 this.routingEnd = routingEnd
+                this.lastPage = null
                 window.addEventListener('hashchange', e => this.routeTo(window.location.hash))
             }
             addRoute(route, callback) {
@@ -277,7 +278,7 @@
                         [, page, ...wildcards] = path.split('/')
                     else
                         page = path
-                    this.state = { page, wildcards }
+                    this.state = { page, wildcards, lastPage: this.lastPage }
                     if (queryString) {
                         params = new URLSearchParams(queryString)
                         this.state.params = Object.fromEntries(params)
@@ -287,9 +288,13 @@
                     }
                     if (this.routes[page]) {
                         await this.routes[page](this.state)
-                        this.state.lastPage = page
+                        this.lastPage = page
                     } else {
-                        this.routes['404'](this.state)
+                        if (this.routes['404']) {
+                            this.routes['404'](this.state);
+                        } else {
+                            console.error(`No route found for '${page}' and no '404' route is defined.`);
+                        }
                     }
                     if (this.routingEnd) {
                         this.routingEnd(this.state)
@@ -437,7 +442,6 @@
                     history.scrollRestoration = "manual";
                 }
                 window.scrollTo(0, 0);
-                renderElem(getRef('app_body'), html``);
             },
             routingEnd() {
                 document.querySelectorAll(".my-flo-address").forEach(elem => {
@@ -860,7 +864,7 @@
         }
         let userAddressTimeInterval;
         function renderHome(appState) {
-            const { params: { filter = 'pending', search } = {} } = appState || {};
+            const { lastPage, page, params: { filter = 'pending', search } = {} } = appState || {};
             const mainHeader = html`
                 <header id="main_header">
                     <div class="app-brand margin-right-auto hide-on-small">
@@ -884,49 +888,43 @@
                 renderElem(getRef('app_body'), html`
                     <article id="home_page">
                         ${mainHeader}
-                        <section class="grid gap-1">
-                            <div id="kyc_requests_header" class="flex align-center space-between gap-1 flex-wrap">
-                                <h3>KYC requests</h3>
-                                <sm-chips id="kyc_request_filter" onchange=${handleRequestFilter}>
-                                    <sm-chip value="pending" ?selected=${filter === "pending"}>Pending</sm-chip>
-                                    <sm-chip value="rejected" ?selected=${filter === "rejected"}>Rejected</sm-chip>
-                                    <sm-chip value="approved" ?selected=${filter === "approved"}>Approved</sm-chip>
-                                    <sm-chip value="all" ?selected=${filter === "all"}>All</sm-chip>
-                                </sm-chips>
-                            </div>
-                            <sm-input id="search_approved" type="search" placeholder="Search address" oninput=${handleRequestSearch}>
-                                <svg class="icon" slot="icon" xmlns="http://www.w3.org/2000/svg" height="24px"
-                                    viewBox="0 0 24 24" width="24px" fill="#000000">
-                                    <path d="M0 0h24v24H0V0z" fill="none" />
-                                    <path
-                                        d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
-                                </svg>
-                            </sm-input>
-                            <div id="selected_wrapper" class="flex gap-0-5 align-center hidden">
-                                <button class="button icon-only" title="Clear selection" onclick=${clearSelection}>
-                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
-                                        width="24px" fill="#000000">
-                                        <path d="M0 0h24v24H0V0z" fill="none" />
-                                        <path
-                                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                                    </svg>
-                                </button>
-                                <div id="selected_addresses"></div>
-                                <div class="multi-state-button margin-left-auto">
-                                    <button id="revoke_kyc_button" class="button button--primary"
-                                        onclick=${revokeKycs}>Revoke selected</button>
+                        <div id="verifier_wrapper" class="flex flex-wrap gap-1 align-items-start">
+                            <section id="verifier_balance_container" class="grid gap-1"> </section>
+                            <section class="grid gap-1">
+                                <div id="kyc_requests_header" class="flex align-center space-between gap-1 flex-wrap">
+                                    <h3>KYC requests</h3>
+                                    <sm-chips id="kyc_request_filter" onchange=${handleRequestFilter}>
+                                        <sm-chip value="pending" ?selected=${filter === "pending"}>Pending</sm-chip>
+                                        <sm-chip value="rejected" ?selected=${filter === "rejected"}>Rejected</sm-chip>
+                                        <sm-chip value="approved" ?selected=${filter === "approved"}>Approved</sm-chip>
+                                        <sm-chip value="all" ?selected=${filter === "all"}>All</sm-chip>
+                                    </sm-chips>
                                 </div>
-                            </div>
-                            ${filter === "approved" ? html`
-                                <p>Select KYC verification to revoke</p>
-                            `: ''}
-                            <ul id="kyc_requests_list" class="flex flex-direction-column gap-0-5" onchange=${handleAddressSelection}>
-                                ${renderedKycRequests?.length ? renderedKycRequests : html`<li class="text-center" style="padding: 3rem;">No requests found</li>`}
-                            </ul>
-                        </section>
+                                <sm-input id="search_approved" type="search" placeholder="Search address" oninput=${handleRequestSearch}>
+                                    <svg class="icon" slot="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /> </svg>
+                                </sm-input>
+                                <div id="selected_wrapper" class="flex gap-0-5 align-center hidden">
+                                    <button class="button icon-only" title="Clear selection" onclick=${clearSelection}>
+                                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" /> </svg>
+                                    </button>
+                                    <div id="selected_addresses"></div>
+                                    <div class="multi-state-button margin-left-auto">
+                                        <button id="revoke_kyc_button" class="button button--primary" onclick=${revokeKycs}>Revoke selected</button>
+                                    </div>
+                                </div>
+                                ${filter === "approved" ? html`
+                                    <p>Select KYC verification to revoke</p>
+                                `: ''}
+                                <ul id="kyc_requests_list" class="flex flex-direction-column gap-0-5" onchange=${handleAddressSelection}>
+                                    ${renderedKycRequests?.length ? renderedKycRequests : html`<li class="text-center" style="padding: 3rem;">No requests found</li>`}
+                                </ul>
+                            </section>
+                        </div>
                         <button id="commit_approvals" class="fab button button--primary" data-count="0" onclick=${initApproval}>Commit approvals</button>
                     </article>
                 `);
+                if (lastPage !== page)
+                    checkBalance();
             } else if (floGlobals.isAdmin) {
                 const renderedSubAdmins = floGlobals.subAdmins.map(address => render.approvedAggregatorCard(address));
                 renderElem(getRef('app_body'), html`
@@ -1274,7 +1272,7 @@
             renderHome()
         }
         async function rejectKyc(e) {
-            const confirmation = await getConfirmation('Are you sure you want to reject this user?', {
+            const confirmation = await getConfirmation('Are you sure you want to reject this KYC?', {
                 confirmText: 'Reject',
             });
             if (!confirmation) return;
@@ -1282,14 +1280,14 @@
             buttonLoader(button, true)
             const { requestVC, docVC } = floGlobals.currentRequest;
             try {
-                // await floCloudAPI.noteApplicationData(requestVC, 'rejected')
+                await floCloudAPI.noteApplicationData(requestVC, 'rejected')
                 floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].note = 'rejected'
-                notify('User rejected successfully', 'success');
+                notify('KYC rejected successfully', 'success');
                 closePopup()
                 renderHome()
             } catch (err) {
                 console.error(err)
-                notify('Error rejecting user', 'error');
+                notify('Error rejecting KYC', 'error');
             } finally {
                 buttonLoader(button, false)
             }
@@ -1324,27 +1322,42 @@
             getRef('selected_wrapper').classList.add('hidden')
             getRef('kyc_requests_list').querySelectorAll('input').forEach(input => input.checked = false)
         }
-        function checkBalance(address) {
-            if (!address)
-                address = floCrypto.getFloID(getRef('approver_private_key').value.trim())
-            if (getRef('approver_private_key').isValid) {
-                floBlockchainAPI.getBalance(address).then(balance => {
-                    if (balance < 0.01) {
-                        renderElem(getRef('aggregator_balance'), html`Balance: ${balance} FLO. You don't have enough FLO.`);
-                        getRef('aggregator_balance').classList.add('error')
-                    } else {
-                        renderElem(getRef('aggregator_balance'), html`Balance: ${balance} FLO`);
-                        getRef('aggregator_balance').classList.remove('error')
-                    }
-                    getRef('aggregator_balance').classList.remove('hidden')
-                }).catch(err => {
-                    console.error(err)
-                    notify('Error fetching balance', 'error')
-                    getRef('aggregator_balance').classList.add('hidden')
-                })
-            } else {
-                getRef('aggregator_balance').classList.add('hidden')
-            }
+        function checkBalance() {
+            renderElem(getRef('verifier_balance_container'), html`
+                <h4>FLO balance</h4>
+                <div class="flex align-center gap-1">
+                    <sm-spinner></sm-spinner>
+                    <span>Checking balance...</span>
+                </div>
+            `)
+            floBlockchainAPI.getBalance(floGlobals.myFloID).then(balance => {
+                if (balance < 0.01) {
+                    renderElem(getRef('verifier_balance_container'), html`
+                        <div class="flex align-center space-between gap-1">
+                            <h4>FLO balance</h4>
+                            <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
+                        </div>
+                        <h2 style="color: var(--danger-color)">Insufficient balance</h2>
+                    `)
+                } else {
+                    renderElem(getRef('verifier_balance_container'), html`
+                        <div class="flex align-center space-between gap-1">
+                            <h4>FLO balance</h4>
+                            <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
+                        </div>
+                        <h2>${balance} FLO</h2>
+                    `)
+                }
+            }).catch(err => {
+                console.error(err)
+                renderElem(getRef('verifier_balance_container'), html`
+                    <div class="flex align-center space-between gap-1">
+                        <h4>FLO balance</h4>
+                        <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
+                    </div>
+                    <h2 style="color: var(--danger-color)">Error fetching balance</h2>
+                `)
+            })
         }
         function initApproval() {
             const approvedAddress = [...floGlobals.approvalsToBeCommitted.keys()].map(address => {
@@ -1749,13 +1762,6 @@
                     notify('Error loading KYC documents', 'error')
                 }
             }).catch(error => console.error(error))
-
-            try {
-                await getApprovedAggregators();
-                // await getApprovedKycs();
-            } catch (error) {
-                console.error(error);
-            }
         }
     </script>
 </body>

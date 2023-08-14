@@ -742,7 +742,7 @@ h3 {
   flex-direction: column;
   gap: 1rem;
 }
-#home_page section {
+#home_page > section {
   display: grid;
   width: min(100% - 2rem, 42rem);
   margin: 0 auto;
@@ -832,12 +832,22 @@ h3 {
   color: rgba(var(--text-color), 0.8);
 }
 
+#verifier_wrapper > * {
+  background-color: rgba(var(--foreground-color), 1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+}
+
+#verifier_balance_container {
+  width: 100%;
+}
+
 .kyc-request {
   display: grid;
   gap: 1rem;
   padding: 1rem;
   border-radius: 0.5rem;
-  background-color: rgba(var(--foreground-color), 1);
+  background-color: rgba(var(--background-color), 1);
 }
 .kyc-request time {
   font-size: 0.9rem;
@@ -863,7 +873,7 @@ h3 {
   justify-content: space-between;
   padding: 1rem;
   border-radius: 0.5rem;
-  background-color: rgba(var(--foreground-color), 1);
+  background-color: rgba(var(--background-color), 1);
 }
 .revoke-card label {
   gap: 1rem;
@@ -975,6 +985,13 @@ h3 {
   }
   .popup__header {
     padding: 1.5rem 1.5rem 0 0.75rem;
+  }
+  #verifier_wrapper {
+    display: grid;
+    grid-template-columns: 16rem 1fr;
+    width: min(64rem, 100%);
+    margin: 0 auto;
+    align-items: flex-start;
   }
   #view_file_popup {
     --width: min(56rem, 100%);
