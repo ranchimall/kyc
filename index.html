@@ -778,9 +778,16 @@
                 const { status = 'pending', address } = options;
                 const kycRequests = floDapps.getNextGeneralData('userKycRequests', '0');
                 const filteredRequests = [];
+                const approvedRequests = new Set();
                 Object.values(kycRequests).forEach((request) => {
                     const { time, tag, note, senderID } = request;
                     const floAddress = getFloAddress(senderID)
+                    if (status === 'pending') {
+                        if (approvedRequests.has(floAddress))
+                            return;
+                        if (tag?.includes('approved'))
+                            approvedRequests.add(floAddress)
+                    }
                     if (status) {
                         switch (status) {
                             case 'approved':
