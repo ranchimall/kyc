@@ -1,11 +1,11 @@
 function checkIfSentByMasterAddress(tx) {
-    return tx.vin.some(vin => vin.addresses[0] === floGlobals.masterAddress);
+    return tx.vin.some(vin => vin.addresses[0] === floGlobals.adminID);
 }
 
 function getApprovedAggregators() {
     floGlobals.approvedKycAggregators = {};
     return new Promise((resolve, reject) => {
-        floBlockchainAPI.readAllTxs(floGlobals.masterAddress).then(({ items: transactions }) => {
+        floBlockchainAPI.readAllTxs(floGlobals.adminID).then(({ items: transactions }) => {
             console.log(transactions);
             transactions.filter(tx => checkIfSentByMasterAddress(tx) && tx.floData.startsWith('KYC'))
                 .reverse()
