@@ -151,6 +151,19 @@
     <!-- <script src="scripts/main.js"></script> -->
     <script>
         const { html, render: renderElem } = uhtml;
+        //Checks for internet connection status
+        uiGlobals.connectionErrorNotification = []
+        if (!navigator.onLine)
+            uiGlobals.connectionErrorNotification.push(notify('There seems to be a problem connecting to the internet, Please check you internet connection.', 'error'))
+        window.addEventListener('offline', () => {
+            uiGlobals.connectionErrorNotification.push(notify('There seems to be a problem connecting to the internet, Please check you internet connection.', 'error'))
+        })
+        window.addEventListener('online', () => {
+            uiGlobals.connectionErrorNotification.forEach(notification => notification.remove())
+            notify('We are back online.', 'success')
+            location.reload()
+            uiGlobals.connectionErrorNotification = []
+        })
         // Use instead of document.getElementById
         function getRef(elementId) {
             return document.getElementById(elementId)
