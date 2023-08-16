@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KYC docs</title>
+    <title>RanchiMall KYC</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -463,7 +463,7 @@
                 <article id="loading">
                     <sm-spinner></sm-spinner>
                     <div class="grid gap-1 justify-items-center">
-                        <h4>Loading RanchiMall KYC Docs</h4>
+                        <h4>Loading RanchiMall KYC</h4>
                         <button class="button button--colored" onclick=${clearCredentials}>Reset</button>
                     </div>
                 </article>
@@ -545,7 +545,7 @@
                             <div class="app-name">
                                 <div class="app-name__company">RanchiMall</div>
                                 <h4 class="app-name__title">
-                                    KYC Docs
+                                    KYC
                                 </h4>
                             </div>
                         </div>
@@ -1459,22 +1459,23 @@
                 })
                 if (!confirmation) return
                 buttonLoader(getRef('revoke_kyc_button'), true)
+                const txId = await floBlockchainAPI.writeData(floGlobals.myFloID, floData, approverPrivateKey, floGlobals.myFloID)
                 const cloudPromises = [...addressesToRevoke.values()].flatMap(({ requestVC, docVC }) => {
-                    floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].tag = 'revoked'
+                    floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].tag = null
+                    floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].note = 'revoked'
                     return [
-                        floCloudAPI.tagApplicationData(requestVC, 'revoked'),
-                        floCloudAPI.tagApplicationData(docVC, 'revoked')
+                        floCloudAPI.tagApplicationData(requestVC, null),
+                        floCloudAPI.noteApplicationData(requestVC, 'revoked'),
+                        floCloudAPI.tagApplicationData(docVC, null)
                     ]
                 })
-                const [txId, ...cloudResponses] = await Promise.all([
-                    floBlockchainAPI.writeData(floGlobals.myFloID, floData, approverPrivateKey, floGlobals.myFloID),
-                    ...cloudPromises
-                ])
+                const cloudResponses = await Promise.all(cloudPromises)
                 notify(`Revoke request submitted. TXID: ${txId}`, 'success');
                 addressesToRevoke.clear()
                 clearSelection()
             } catch (e) {
-                notify(e, 'error')
+                notify('Error revoking users. If you have just approved or revoked KYCs wait for 5 mins.', 'error');
+                console.error(e)
             } finally {
                 buttonLoader(getRef('revoke_kyc_button'), false)
                 setTimeout(() => {
