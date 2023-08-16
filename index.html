@@ -151,6 +151,9 @@
     <!-- <script src="scripts/main.js"></script> -->
     <script>
         const { html, render: renderElem } = uhtml;
+        const uiGlobals = {
+            // Use to store global variables
+        }
         //Checks for internet connection status
         uiGlobals.connectionErrorNotification = []
         if (!navigator.onLine)
