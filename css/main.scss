@@ -45,7 +45,7 @@ body[data-theme="dark"] {
 p,
 strong {
   font-size: 0.9rem;
-  max-width: 65ch;
+  max-width: 75ch;
   line-height: 1.7;
   color: rgba(var(--text-color), 0.9);
 
@@ -175,6 +175,22 @@ details[open] {
     transform: rotate(180deg);
   }
 }
+input[type="date"] {
+  display: flex;
+  width: 100%;
+  padding: 0.8rem 0.6rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background-color: rgba(var(--text-color), 0.06);
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 0.1rem var(--accent-color);
+  }
+}
 
 sm-input,
 sm-textarea {
@@ -208,10 +224,6 @@ sm-chip {
   --padding: 0.5rem 0.8rem;
   --background: rgba(var(--text-color), 0.06);
   user-select: none;
-  &[selected] {
-    --background: var(--accent-color);
-    color: rgba(var(--background-color), 1);
-  }
 }
 sm-select {
   &::part(options) {
@@ -227,6 +239,15 @@ sm-option {
 ul {
   list-style: none;
 }
+ol {
+  li {
+    margin-left: 1rem;
+    font-size: 0.9rem;
+    max-width: 75ch;
+    line-height: 1.7;
+    color: rgba(var(--text-color), 0.9);
+  }
+}
 fieldset {
   display: grid;
   gap: 0.5rem;
@@ -234,7 +255,6 @@ fieldset {
   border-radius: 0.5rem;
   border: solid 1px rgba(var(--text-color), 0.3);
   legend {
-    font-size: 0.9rem;
     font-weight: 500;
   }
 }
@@ -342,8 +362,11 @@ h3 {
   text-align: right;
 }
 
-.align-start {
+.align-content-start {
   align-content: flex-start;
+}
+.align-items-start {
+  align-items: flex-start;
 }
 
 .align-center {
@@ -758,7 +781,6 @@ h3 {
 }
 
 #file_upload_section {
-  margin-bottom: 3rem;
   fieldset {
     padding: 0.5rem;
   }
