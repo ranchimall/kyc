@@ -1065,12 +1065,12 @@
                             return html`
                                 <fieldset id="file_doc_type_selector" onchange=${(e) => { setSelectedIdProof(e.target.value) }}>
                                     <legend>Select ID proof</legend>
-                                    <label class="interact" disabled=${selectedFile}>
-                                        <input type="radio" name="file_type" value="driving_license" disabled=${selectedFile}/>
+                                    <label class="interact" disabled=${Boolean(selectedFile)}>
+                                        <input type="radio" name="file_type" value="driving_license" disabled=${Boolean(selectedFile)}/>
                                         <span>Driving license</span>
                                     </label>
-                                    <label class="interact" disabled=${selectedFile}>
-                                        <input type="radio" name="file_type" value="passport" disabled=${selectedFile}/>
+                                    <label class="interact" disabled=${Boolean(selectedFile)}>
+                                        <input type="radio" name="file_type" value="passport" disabled=${Boolean(selectedFile)}/>
                                         <span>Passport</span>
                                     </label>
                                 </fieldset>

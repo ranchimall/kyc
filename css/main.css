@@ -499,7 +499,7 @@ h3 {
   background: radial-gradient(circle, rgba(var(--background-color), 0.3) 0%, rgba(0, 0, 0, 0) 50%);
 }
 
-.interact:not([disabled]) {
+.interact:not([disabled=true]) {
   position: relative;
   overflow: hidden;
   cursor: pointer;

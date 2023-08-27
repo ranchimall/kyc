@@ -468,7 +468,7 @@ h3 {
     );
   }
 }
-.interact:not([disabled]) {
+.interact:not([disabled="true"]) {
   position: relative;
   overflow: hidden;
   cursor: pointer;
