@@ -139,7 +139,7 @@
             </div>
         </sm-form>
     </sm-popup>
-    <script src="https://unpkg.com/neverland"></script>
+    <script src="scripts/neverland.min.js"></script>
     <script src="scripts/components.min.js"></script>
     <script src="scripts/lib.js"></script>
     <script src="scripts/floCrypto.js"></script>
@@ -873,11 +873,11 @@
                     const { pubKey, name } = floGlobals.appObjects.kycDocs.issuers[issuer] || {};
                     if (!name || !pubKey) return html``;
                     return html`
-                    <label class="interact">
-                        <input type="radio" name="kyc_issuer" value=${pubKey}/>
-                        <span>${name}</span>
+                        <label class="interact">
+                            <input type="radio" name="kyc_issuer" value=${pubKey}/>
+                            <span>${name}</span>
                         </label>
-                        `;
+                    `;
                 });
                 switch (country) {
                     case 'el-salvador': {
@@ -1065,12 +1065,12 @@
                             return html`
                                 <fieldset id="file_doc_type_selector" onchange=${(e) => { setSelectedIdProof(e.target.value) }}>
                                     <legend>Select ID proof</legend>
-                                    <label class="interact">
-                                        <input type="radio" name="file_type" value="driving_license"/>
+                                    <label class="interact" disabled=${selectedFile}>
+                                        <input type="radio" name="file_type" value="driving_license" disabled=${selectedFile}/>
                                         <span>Driving license</span>
                                     </label>
-                                    <label class="interact">
-                                        <input type="radio" name="file_type" value="passport"/>
+                                    <label class="interact" disabled=${selectedFile}>
+                                        <input type="radio" name="file_type" value="passport" disabled=${selectedFile}/>
                                         <span>Passport</span>
                                     </label>
                                 </fieldset>
@@ -1823,7 +1823,7 @@
                 notify('copied', 'success')
             })
             document.addEventListener("pointerdown", (e) => {
-                if (e.target.closest("button:not([disabled]), sm-button:not([disabled]), .interact")) {
+                if (e.target.closest("button:not([disabled]), sm-button:not([disabled]), .interact:not([disabled])")) {
                     createRipple(e, e.target.closest("button, sm-button, .interact"));
                 }
             });

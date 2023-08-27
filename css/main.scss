@@ -468,7 +468,7 @@ h3 {
     );
   }
 }
-.interact {
+.interact:not([disabled]) {
   position: relative;
   overflow: hidden;
   cursor: pointer;
