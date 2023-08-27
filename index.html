@@ -970,143 +970,141 @@
 
                                 reader.readAsArrayBuffer(selectedFile);
                             }
+                            // <fieldset>
+                            //     <legend>A. Personal information</legend>
+                            //     <sm-input placeholder="Full name"></sm-input>
+                            //     <sm-textarea placeholder="Full address" rows="3"></sm-textarea>
+                            // </fieldset>
+                            // <fieldset>
+                            //     <legend>B. Politically exposed person form (PEP'S)</legend>
+                            //     <div class="grid gap-3">
+                            //         <div class="grid gap-1">
+                            //             <p>Do you hold or have held any important public office? E.g. Minister, Mayor, Deputy, Other</p>
+                            //             <div class="flex align-center gap-1" onchange=${(e) => { setIsHoldingImpPubOffice(e.target.value === 'yes') }}>    
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="person-pep" value="yes"/>
+                            //                     <span>Yes</span>
+                            //                 </label>
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="person-pep" value="no" checked/>
+                            //                     <span>No</span>
+                            //                 </label>
+                            //             </div>
+                            //             ${isHoldingImpPubOffice ? html`
+                            //                 <sm-input placeholder="Title"></sm-input>
+                            //                 <div class="flex align-center gap-0-5 flex-wrap">
+                            //                     <sm-input placeholder="Period" class="flex-1"></sm-input>
+                            //                     <input placeholder="Start" type="date" class="flex-1">
+                            //                     <input placeholder="End" type="date" class="flex-1">
+                            //                 </div>
+                            //             `: ''}
+                            //         </div>
+                            //         <div class="grid gap-1">
+                            //             <p>Does any family member (Husband, parents, siblings, in-laws, etc.) hold or have held any important public office?</p>
+                            //             <div class="flex align-center gap-1" onchange=${(e) => { setIsFamilyMemberHoldingImpPubOffice(e.target.value === 'yes') }}>    
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="family-pep" value="yes"/>
+                            //                     <span>Yes</span>
+                            //                 </label>
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="family-pep" value="no" checked/>
+                            //                     <span>No</span>
+                            //                 </label>
+                            //             </div>
+                            //             ${isFamilyMemberHoldingImpPubOffice ? html`
+                            //                 <sm-input placeholder="Name"></sm-input>
+                            //                 <sm-input placeholder="Title"></sm-input>
+                            //                 <sm-input placeholder="Relative name"></sm-input>
+                            //                 <sm-input placeholder="Sibling"></sm-input>
+                            //             `: ''}
+                            //         </div>
+                            //         <div class="grid gap-1">
+                            //             <p>Does you have an associate holding a major public office?</p>
+                            //             <div class="flex align-center gap-1" onchange=${(e) => { setIsAssociatedWithImpPubOffice(e.target.value === 'yes') }}>    
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="associate-pep" value="yes"/>
+                            //                     <span>Yes</span>
+                            //                 </label>
+                            //                 <label class="interact">
+                            //                     <input type="radio" name="associate-pep" value="no" checked/>
+                            //                     <span>No</span>
+                            //                 </label>
+                            //             </div>
+                            //             ${isAssociatedWithImpPubOffice ? html`
+                            //                 <sm-input placeholder="Name"></sm-input>
+                            //                 <sm-input placeholder="Position held"></sm-input>
+                            //                 <div class="flex align-center gap-0-5 flex-wrap">
+                            //                     <sm-input placeholder="Period" class="flex-1"></sm-input>
+                            //                     <input placeholder="Start" type="date" class="flex-1">
+                            //                     <input placeholder="End" type="date" class="flex-1">
+                            //                 </div>
+                            //             `: ''}
+                            //         </div>
+                            //         <p>
+                            //             Politically Exposed Persons (PEP'S): Those natural persons identified at the beginning or during the course of the contractual relationship, nationals or foreigners, who perform or have performed public functions in our country or in their country of origin, as well as their relatives in the first and second degree of consanguinity or affinity, life partners or commercial or business associates.
+                            //         </p>
+                            //     </div>
+                            // </fieldset>
+                            // <fieldset>
+                            //     <legend>C. Declaration of legal origin and accuracy of the information</legend>
+                            //     <ol class="grid gap-1-5" type="a">
+                            //         <li>
+                            //             All the values that we (I) deliver will have an origin that in no way will be related to the cultivation, production, manufacture, storage or transport or illicit traffic of narcotic or psychotropic substances or any other related illegal activity, nor will we (I) admit that third parties make deposits in accounts in our (my) charge with funds coming from the above mentioned activities or those foreseen by the Anti-Money Laundering Law, allowing any investigation procedure by <strong>Project B El Salvador</strong> or the corresponding authorities.
+                            //         </li>
+                            //         <li>
+                            //             The information provided in this instrument to <strong>Project B El Salvador</strong> is true and may be verified at any time.
+                            //         </li>
+                            //         <li>
+                            //             We exempt <strong>Project B El Salvador</strong> from any liability arising from erroneous, false, or inaccurate information that we (I) have (would have) provided in this document or from the violation thereof.
+                            //         </li>
+                            //     </ol> 
+                            // </fieldset>
+                            // <fieldset>
+                            //     <legend>D. Provided documents</legend>
+                            // </fieldset>
                             return html`
-                                <fieldset>
-                                    <legend>A. Personal information</legend>
-                                    <sm-input placeholder="Full name"></sm-input>
-                                    <sm-textarea placeholder="Full address" rows="3"></sm-textarea>
+                                <fieldset id="file_doc_type_selector" onchange=${(e) => { setSelectedIdProof(e.target.value) }}>
+                                    <legend>Select ID proof</legend>
+                                    <label class="interact">
+                                        <input type="radio" name="file_type" value="driving_license"/>
+                                        <span>Driving license</span>
+                                    </label>
+                                    <label class="interact">
+                                        <input type="radio" name="file_type" value="passport"/>
+                                        <span>Passport</span>
+                                    </label>
                                 </fieldset>
-                                <fieldset>
-                                    <legend>B. Politically exposed person form (PEP'S)</legend>
-                                    <div class="grid gap-3">
-                                        <div class="grid gap-1">
-                                            <p>Do you hold or have held any important public office? E.g. Minister, Mayor, Deputy, Other</p>
-                                            <div class="flex align-center gap-1" onchange=${(e) => { setIsHoldingImpPubOffice(e.target.value === 'yes') }}>    
-                                                <label class="interact">
-                                                    <input type="radio" name="person-pep" value="yes"/>
-                                                    <span>Yes</span>
-                                                </label>
-                                                <label class="interact">
-                                                    <input type="radio" name="person-pep" value="no" checked/>
-                                                    <span>No</span>
-                                                </label>
-                                            </div>
-                                            ${isHoldingImpPubOffice ? html`
-                                                <sm-input placeholder="Title"></sm-input>
-                                                <div class="flex align-center gap-0-5 flex-wrap">
-                                                    <sm-input placeholder="Period" class="flex-1"></sm-input>
-                                                    <input placeholder="Start" type="date" class="flex-1">
-                                                    <input placeholder="End" type="date" class="flex-1">
-                                                </div>
-                                            `: ''}
+                                ${selectedIdProof ? html`
+                                    <label class=${`drag-drop-container card grid gap-1 ${selectedFile ? 'hidden' : ''}`} id="drag_drop_container" ondragover=${handleDragOver} ondragleave=${handleDragLeave} ondrop=${handleDrop}>
+                                        <svg id="upload_icon" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" width="782.04441" height="701.88002" viewBox="0 0 782.04441 701.88002" xmlns:xlink="http://www.w3.org/1999/xlink"> <def> <style> .accented{ fill: var(--accent-color); } </style> </def> <path d="M609.48783,100.59015l-25.44631,6.56209L270.53735,187.9987,245.091,194.56079A48.17927,48.17927,0,0,0,210.508,253.17865L320.849,681.05606a48.17924,48.17924,0,0,0,58.61776,34.58317l.06572-.01695,364.26536-93.93675.06572-.01695a48.17923,48.17923,0,0,0,34.58309-58.6178l-110.341-427.87741A48.17928,48.17928,0,0,0,609.48783,100.59015Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M612.94784,114.00532l-30.13945,7.77236L278.68955,200.20385l-30.139,7.77223a34.30949,34.30949,0,0,0-24.6275,41.74308l110.341,427.87741a34.30946,34.30946,0,0,0,41.7431,24.62736l.06572-.01695,364.26536-93.93674.06619-.01707a34.30935,34.30935,0,0,0,24.627-41.7429l-110.341-427.87741A34.30938,34.30938,0,0,0,612.94784,114.00532Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <path d="M590.19,252.56327,405.917,300.08359a8.01411,8.01411,0,0,1-4.00241-15.52046l184.273-47.52033A8.01412,8.01412,0,0,1,590.19,252.56327Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M628.955,270.49906,412.671,326.27437a8.01411,8.01411,0,1,1-4.00241-15.52046l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M620.45825,369.93676l-184.273,47.52032a8.01411,8.01411,0,1,1-4.00242-15.52046l184.273-47.52032a8.01411,8.01411,0,1,1,4.00241,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M659.22329,387.87255l-216.284,55.77531a8.01411,8.01411,0,1,1-4.00242-15.52046l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M650.72653,487.31025l-184.273,47.52033a8.01412,8.01412,0,0,1-4.00242-15.52047l184.273-47.52032a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M689.49156,505.246l-216.284,55.77532a8.01412,8.01412,0,1,1-4.00241-15.52047l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M374.45884,348.80871l-65.21246,16.817a3.847,3.847,0,0,1-4.68062-2.76146L289.5963,304.81607a3.847,3.847,0,0,1,2.76145-4.68061l65.21247-16.817a3.847,3.847,0,0,1,4.68061,2.76145l14.96947,58.04817A3.847,3.847,0,0,1,374.45884,348.80871Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M404.72712,466.1822l-65.21247,16.817a3.847,3.847,0,0,1-4.68062-2.76146l-14.96946-58.04816A3.847,3.847,0,0,1,322.626,417.509l65.21246-16.817a3.847,3.847,0,0,1,4.68062,2.76145l14.96946,58.04817A3.847,3.847,0,0,1,404.72712,466.1822Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M434.99539,583.55569l-65.21246,16.817a3.847,3.847,0,0,1-4.68062-2.76145l-14.96946-58.04817a3.847,3.847,0,0,1,2.76145-4.68062l65.21247-16.817a3.847,3.847,0,0,1,4.68061,2.76146l14.96947,58.04816A3.847,3.847,0,0,1,434.99539,583.55569Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M863.63647,209.0517H487.31811a48.17928,48.17928,0,0,0-48.125,48.12512V699.05261a48.17924,48.17924,0,0,0,48.125,48.12507H863.63647a48.17924,48.17924,0,0,0,48.125-48.12507V257.17682A48.17928,48.17928,0,0,0,863.63647,209.0517Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M863.637,222.90589H487.31811a34.30948,34.30948,0,0,0-34.271,34.27093V699.05261a34.30947,34.30947,0,0,0,34.271,34.27088H863.637a34.30936,34.30936,0,0,0,34.27051-34.27088V257.17682A34.30937,34.30937,0,0,0,863.637,222.90589Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <circle class="accented" cx="694.19401" cy="614.02963" r="87.85039"/> <path d="M945.18722,701.63087H914.63056V671.07421a11.45875,11.45875,0,0,0-22.9175,0v30.55666H861.1564a11.45875,11.45875,0,0,0,0,22.9175h30.55666V755.105a11.45875,11.45875,0,1,0,22.9175,0V724.54837h30.55666a11.45875,11.45875,0,0,0,0-22.9175Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <path d="M807.00068,465.71551H616.699a8.01412,8.01412,0,1,1,0-16.02823H807.00068a8.01412,8.01412,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M840.05889,492.76314H616.699a8.01412,8.01412,0,1,1,0-16.02823H840.05889a8.01411,8.01411,0,1,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M807.00068,586.929H616.699a8.01412,8.01412,0,1,1,0-16.02823H807.00068a8.01411,8.01411,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M840.05889,613.97661H616.699a8.01412,8.01412,0,1,1,0-16.02823H840.05889a8.01412,8.01412,0,1,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M574.07028,505.04162H506.72434a3.847,3.847,0,0,1-3.84278-3.84278V441.25158a3.847,3.847,0,0,1,3.84278-3.84278h67.34594a3.847,3.847,0,0,1,3.84278,3.84278v59.94726A3.847,3.847,0,0,1,574.07028,505.04162Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M574.07028,626.25509H506.72434a3.847,3.847,0,0,1-3.84278-3.84278V562.46505a3.847,3.847,0,0,1,3.84278-3.84278h67.34594a3.847,3.847,0,0,1,3.84278,3.84278v59.94726A3.847,3.847,0,0,1,574.07028,626.25509Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M807.21185,330.781H666.91017a8.01411,8.01411,0,0,1,0-16.02823H807.21185a8.01411,8.01411,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#ccc"/> <path d="M840.27007,357.82862H666.91017a8.01411,8.01411,0,1,1,0-16.02822h173.3599a8.01411,8.01411,0,0,1,0,16.02822Z" transform="translate(-208.9778 -99.05999)" fill="#ccc"/> <path class="accented" d="M635.85911,390.6071H506.51316a3.847,3.847,0,0,1-3.84277-3.84277V285.81706a3.847,3.847,0,0,1,3.84277-3.84277H635.85911a3.847,3.847,0,0,1,3.84277,3.84277V386.76433A3.847,3.847,0,0,1,635.85911,390.6071Z" transform="translate(-208.9778 -99.05999)"/> </svg>
+                                        <div class="grid gap-0-3">
+                                            <h4 class="drag-drop-text">
+                                                Drag & Drop ${docTypeNames[selectedIdProof]} here or click to browse
+                                            </h4>
+                                            <p>
+                                                Max file size: ${maxFileSizeInMB}MB. Allowed file types are <b>".png, .jpg, .pdf"</b>
+                                            </p>
                                         </div>
-                                        <div class="grid gap-1">
-                                            <p>Does any family member (Husband, parents, siblings, in-laws, etc.) hold or have held any important public office?</p>
-                                            <div class="flex align-center gap-1" onchange=${(e) => { setIsFamilyMemberHoldingImpPubOffice(e.target.value === 'yes') }}>    
-                                                <label class="interact">
-                                                    <input type="radio" name="family-pep" value="yes"/>
-                                                    <span>Yes</span>
-                                                </label>
-                                                <label class="interact">
-                                                    <input type="radio" name="family-pep" value="no" checked/>
-                                                    <span>No</span>
-                                                </label>
+                                        <strong> Don't worry, your ${docTypeNames[selectedIdProof]} is end-to-end encrypted.</strong>
+                                        <input type="file" id="file_input" accept=".png,.jpg,.pdf" class="hidden" onchange=${handleFileChange}/>
+                                    </label>
+                                `: ''}
+                                ${selectedFile && !isUploading ? html`
+                                    <div id="file_upload_section" class=${`grid gap-1 card`}>
+                                        <div id="upload_button_wrapper" class="flex flex align-center gap-1 flex-wrap">
+                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" /> </svg>
+                                            <h4 id="selected_file_name">${selectedFile?.name}</h4>
+                                            <div class="flex align-center gap-0-5 flex-wrap w-100">
+                                                <button class="button" onclick=${() => { getRef('file_input').click() }} title="Change selected file">
+                                                    Change
+                                                </button>
+                                                <button id="remove_file_button" class="button icon-only" onclick=${() => { setSelectedFile(null) }} title="Remove selected file">
+                                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z" /> </svg>
+                                                </button>
                                             </div>
-                                            ${isFamilyMemberHoldingImpPubOffice ? html`
-                                                <sm-input placeholder="Name"></sm-input>
-                                                <sm-input placeholder="Title"></sm-input>
-                                                <sm-input placeholder="Relative name"></sm-input>
-                                                <sm-input placeholder="Sibling"></sm-input>
-                                            `: ''}
                                         </div>
-                                        <div class="grid gap-1">
-                                            <p>Does you have an associate holding a major public office?</p>
-                                            <div class="flex align-center gap-1" onchange=${(e) => { setIsAssociatedWithImpPubOffice(e.target.value === 'yes') }}>    
-                                                <label class="interact">
-                                                    <input type="radio" name="associate-pep" value="yes"/>
-                                                    <span>Yes</span>
-                                                </label>
-                                                <label class="interact">
-                                                    <input type="radio" name="associate-pep" value="no" checked/>
-                                                    <span>No</span>
-                                                </label>
-                                            </div>
-                                            ${isAssociatedWithImpPubOffice ? html`
-                                                <sm-input placeholder="Name"></sm-input>
-                                                <sm-input placeholder="Position held"></sm-input>
-                                                <div class="flex align-center gap-0-5 flex-wrap">
-                                                    <sm-input placeholder="Period" class="flex-1"></sm-input>
-                                                    <input placeholder="Start" type="date" class="flex-1">
-                                                    <input placeholder="End" type="date" class="flex-1">
-                                                </div>
-                                            `: ''}
-                                        </div>
-                                        <p>
-                                            Politically Exposed Persons (PEP'S): Those natural persons identified at the beginning or during the course of the contractual relationship, nationals or foreigners, who perform or have performed public functions in our country or in their country of origin, as well as their relatives in the first and second degree of consanguinity or affinity, life partners or commercial or business associates.
-                                        </p>
                                     </div>
-                                </fieldset>
-                                <fieldset>
-                                    <legend>C. Declaration of legal origin and accuracy of the information</legend>
-                                    <ol class="grid gap-1-5" type="a">
-                                        <li>
-                                            All the values that we (I) deliver will have an origin that in no way will be related to the cultivation, production, manufacture, storage or transport or illicit traffic of narcotic or psychotropic substances or any other related illegal activity, nor will we (I) admit that third parties make deposits in accounts in our (my) charge with funds coming from the above mentioned activities or those foreseen by the Anti-Money Laundering Law, allowing any investigation procedure by <strong>Project B El Salvador</strong> or the corresponding authorities.
-                                        </li>
-                                        <li>
-                                            The information provided in this instrument to <strong>Project B El Salvador</strong> is true and may be verified at any time.
-                                        </li>
-                                        <li>
-                                            We exempt <strong>Project B El Salvador</strong> from any liability arising from erroneous, false, or inaccurate information that we (I) have (would have) provided in this document or from the violation thereof.
-                                        </li>
-                                    </ol> 
-                                </fieldset>
-                                <fieldset>
-                                    <legend>D. Provided documents</legend>
-                                    <fieldset id="file_doc_type_selector" onchange=${(e) => { setSelectedIdProof(e.target.value) }}>
-                                        <legend>Select ID proof</legend>
-                                        <label class="interact">
-                                            <input type="radio" name="file_type" value="driving_license"/>
-                                            <span>Driving license</span>
-                                        </label>
-                                        <label class="interact">
-                                            <input type="radio" name="file_type" value="passport"/>
-                                            <span>Passport</span>
-                                        </label>
-                                    </fieldset>
-                                    ${selectedIdProof ? html`
-                                        <label class=${`drag-drop-container card grid gap-1 ${selectedFile ? 'hidden' : ''}`} id="drag_drop_container" ondragover=${handleDragOver} ondragleave=${handleDragLeave} ondrop=${handleDrop}>
-                                            <svg id="upload_icon" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1" width="782.04441" height="701.88002" viewBox="0 0 782.04441 701.88002" xmlns:xlink="http://www.w3.org/1999/xlink"> <def> <style> .accented{ fill: var(--accent-color); } </style> </def> <path d="M609.48783,100.59015l-25.44631,6.56209L270.53735,187.9987,245.091,194.56079A48.17927,48.17927,0,0,0,210.508,253.17865L320.849,681.05606a48.17924,48.17924,0,0,0,58.61776,34.58317l.06572-.01695,364.26536-93.93675.06572-.01695a48.17923,48.17923,0,0,0,34.58309-58.6178l-110.341-427.87741A48.17928,48.17928,0,0,0,609.48783,100.59015Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M612.94784,114.00532l-30.13945,7.77236L278.68955,200.20385l-30.139,7.77223a34.30949,34.30949,0,0,0-24.6275,41.74308l110.341,427.87741a34.30946,34.30946,0,0,0,41.7431,24.62736l.06572-.01695,364.26536-93.93674.06619-.01707a34.30935,34.30935,0,0,0,24.627-41.7429l-110.341-427.87741A34.30938,34.30938,0,0,0,612.94784,114.00532Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <path d="M590.19,252.56327,405.917,300.08359a8.01411,8.01411,0,0,1-4.00241-15.52046l184.273-47.52033A8.01412,8.01412,0,0,1,590.19,252.56327Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M628.955,270.49906,412.671,326.27437a8.01411,8.01411,0,1,1-4.00241-15.52046l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M620.45825,369.93676l-184.273,47.52032a8.01411,8.01411,0,1,1-4.00242-15.52046l184.273-47.52032a8.01411,8.01411,0,1,1,4.00241,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M659.22329,387.87255l-216.284,55.77531a8.01411,8.01411,0,1,1-4.00242-15.52046l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M650.72653,487.31025l-184.273,47.52033a8.01412,8.01412,0,0,1-4.00242-15.52047l184.273-47.52032a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/><path d="M689.49156,505.246l-216.284,55.77532a8.01412,8.01412,0,1,1-4.00241-15.52047l216.284-55.77531a8.01411,8.01411,0,0,1,4.00242,15.52046Z" transform="translate(-208.9778 -99.05999)" fill="#f2f2f2"/> <path d="M374.45884,348.80871l-65.21246,16.817a3.847,3.847,0,0,1-4.68062-2.76146L289.5963,304.81607a3.847,3.847,0,0,1,2.76145-4.68061l65.21247-16.817a3.847,3.847,0,0,1,4.68061,2.76145l14.96947,58.04817A3.847,3.847,0,0,1,374.45884,348.80871Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M404.72712,466.1822l-65.21247,16.817a3.847,3.847,0,0,1-4.68062-2.76146l-14.96946-58.04816A3.847,3.847,0,0,1,322.626,417.509l65.21246-16.817a3.847,3.847,0,0,1,4.68062,2.76145l14.96946,58.04817A3.847,3.847,0,0,1,404.72712,466.1822Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M434.99539,583.55569l-65.21246,16.817a3.847,3.847,0,0,1-4.68062-2.76145l-14.96946-58.04817a3.847,3.847,0,0,1,2.76145-4.68062l65.21247-16.817a3.847,3.847,0,0,1,4.68061,2.76146l14.96947,58.04816A3.847,3.847,0,0,1,434.99539,583.55569Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M863.63647,209.0517H487.31811a48.17928,48.17928,0,0,0-48.125,48.12512V699.05261a48.17924,48.17924,0,0,0,48.125,48.12507H863.63647a48.17924,48.17924,0,0,0,48.125-48.12507V257.17682A48.17928,48.17928,0,0,0,863.63647,209.0517Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M863.637,222.90589H487.31811a34.30948,34.30948,0,0,0-34.271,34.27093V699.05261a34.30947,34.30947,0,0,0,34.271,34.27088H863.637a34.30936,34.30936,0,0,0,34.27051-34.27088V257.17682A34.30937,34.30937,0,0,0,863.637,222.90589Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <circle class="accented" cx="694.19401" cy="614.02963" r="87.85039"/> <path d="M945.18722,701.63087H914.63056V671.07421a11.45875,11.45875,0,0,0-22.9175,0v30.55666H861.1564a11.45875,11.45875,0,0,0,0,22.9175h30.55666V755.105a11.45875,11.45875,0,1,0,22.9175,0V724.54837h30.55666a11.45875,11.45875,0,0,0,0-22.9175Z" transform="translate(-208.9778 -99.05999)" fill="#fff"/> <path d="M807.00068,465.71551H616.699a8.01412,8.01412,0,1,1,0-16.02823H807.00068a8.01412,8.01412,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M840.05889,492.76314H616.699a8.01412,8.01412,0,1,1,0-16.02823H840.05889a8.01411,8.01411,0,1,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M807.00068,586.929H616.699a8.01412,8.01412,0,1,1,0-16.02823H807.00068a8.01411,8.01411,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M840.05889,613.97661H616.699a8.01412,8.01412,0,1,1,0-16.02823H840.05889a8.01412,8.01412,0,1,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M574.07028,505.04162H506.72434a3.847,3.847,0,0,1-3.84278-3.84278V441.25158a3.847,3.847,0,0,1,3.84278-3.84278h67.34594a3.847,3.847,0,0,1,3.84278,3.84278v59.94726A3.847,3.847,0,0,1,574.07028,505.04162Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M574.07028,626.25509H506.72434a3.847,3.847,0,0,1-3.84278-3.84278V562.46505a3.847,3.847,0,0,1,3.84278-3.84278h67.34594a3.847,3.847,0,0,1,3.84278,3.84278v59.94726A3.847,3.847,0,0,1,574.07028,626.25509Z" transform="translate(-208.9778 -99.05999)" fill="#e6e6e6"/> <path d="M807.21185,330.781H666.91017a8.01411,8.01411,0,0,1,0-16.02823H807.21185a8.01411,8.01411,0,0,1,0,16.02823Z" transform="translate(-208.9778 -99.05999)" fill="#ccc"/> <path d="M840.27007,357.82862H666.91017a8.01411,8.01411,0,1,1,0-16.02822h173.3599a8.01411,8.01411,0,0,1,0,16.02822Z" transform="translate(-208.9778 -99.05999)" fill="#ccc"/> <path class="accented" d="M635.85911,390.6071H506.51316a3.847,3.847,0,0,1-3.84277-3.84277V285.81706a3.847,3.847,0,0,1,3.84277-3.84277H635.85911a3.847,3.847,0,0,1,3.84277,3.84277V386.76433A3.847,3.847,0,0,1,635.85911,390.6071Z" transform="translate(-208.9778 -99.05999)"/> </svg>
-                                            <div class="grid gap-0-3">
-                                                <h4 class="drag-drop-text">
-                                                    Drag & Drop ${docTypeNames[selectedIdProof]} here or click to browse
-                                                </h4>
-                                                <p>
-                                                    Max file size: ${maxFileSizeInMB}MB. Allowed file types are <b>".png, .jpg, .pdf"</b>
-                                                </p>
-                                            </div>
-                                            <strong> Don't worry, your ${docTypeNames[selectedIdProof]} is end-to-end encrypted.</strong>
-                                            <input type="file" id="file_input" accept=".png,.jpg,.pdf" class="hidden" onchange=${handleFileChange}/>
-                                        </label>
-                                    `: ''}
-                                    ${selectedFile ? html`
-                                        <div id="file_upload_section" class=${`grid gap-1 card`}>
-                                            ${!isUploading ? html`
-                                                <div id="upload_button_wrapper" class="flex flex align-center gap-1 flex-wrap">
-                                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" /> </svg>
-                                                    <h4 id="selected_file_name">${selectedFile?.name}</h4>
-                                                    <div class="flex align-center gap-0-5 flex-wrap w-100">
-                                                        <button class="button" onclick=${() => { getRef('file_input').click() }} title="Change selected file">
-                                                            Change
-                                                        </button>
-                                                        <button id="remove_file_button" class="button icon-only" onclick=${() => { setSelectedFile(null) }} title="Remove selected file">
-                                                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M16 9v10H8V9h8m-1.5-6h-5l-1 1H5v2h14V4h-3.5l-1-1zM18 7H6v12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7z" /> </svg>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            `: ''}
-                                        </div>
-                                    `: ''}
-                                </fieldset>
+                                `: ''}
                                 ${selectedFile ? html`
                                     <fieldset onchange=${(e) => { setSelectedVerifier(e.target.value) }}>
                                         <legend>Select KYC verifier</legend>
@@ -1225,16 +1223,16 @@
                 // user KYC home page
                 const selectedCountry = getRef('country_selector')?.value;
                 const { renderedRequests, concurrentRequests, isVerified } = render.userRequests()
+                // <div class="grid gap-1">
+                //     <div>Select country</div>
+                //     <sm-select id="country_selector" onchange=${() => renderHome()}>
+                //         <sm-option value="el-salvador">El Salvador</sm-option>
+                //         <sm-option value="india">India</sm-option>
+                //     </sm-select>    
+                // </div>   
                 const fileUploadSection = html`
                     <section class="flex flex-direction-column gap-1">
                         <h3 class="text-center" style="margin-bottom: 1rem">KYC verification</h3>
-                        <div class="grid gap-1">
-                            <div>Select country</div>
-                            <sm-select id="country_selector" onchange=${() => renderHome()}>
-                                <sm-option value="el-salvador">El Salvador</sm-option>
-                                <sm-option value="india">India</sm-option>
-                            </sm-select>    
-                        </div>             
                         ${render.countrySpecificForm(selectedCountry)}   
                     </section>
                 `;

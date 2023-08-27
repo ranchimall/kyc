@@ -6,7 +6,7 @@
 }
 
 :root {
-  font-size: clamp(1rem, 1.2vmax, 1.2rem);
+  font-size: clamp(1rem, 1.2vmax, 1.5rem);
 }
 
 html,
@@ -730,7 +730,7 @@ h3 {
   gap: 1rem;
   & > section {
     display: grid;
-    width: min(calc(100% - 2rem), 42rem);
+    width: min(calc(100% - 2rem), 36rem);
     margin: 0 auto;
     margin-bottom: 1rem;
   }
@@ -779,21 +779,15 @@ h3 {
   background-color: rgba(var(--background-color), 1);
   overflow: visible;
 }
-
-#file_upload_section {
-  fieldset {
-    padding: 0.5rem;
-  }
-  label.interact {
-    display: flex;
-    align-items: center;
-    border-radius: 0.3rem;
-    padding: 0.5rem 1rem 0.5rem 0;
-    input {
-      height: 1.2em;
-      width: 1.2em;
-      accent-color: var(--accent-color);
-    }
+label.interact {
+  display: flex;
+  align-items: center;
+  border-radius: 0.3rem;
+  padding: 0.5rem 1rem 0.5rem 0;
+  input {
+    height: 1.2em;
+    width: 1.2em;
+    accent-color: var(--accent-color);
   }
 }
 #verification_list {

@@ -6,7 +6,7 @@
 }
 
 :root {
-  font-size: clamp(1rem, 1.2vmax, 1.2rem);
+  font-size: clamp(1rem, 1.2vmax, 1.5rem);
 }
 
 html,
@@ -768,7 +768,7 @@ h3 {
 }
 #home_page > section {
   display: grid;
-  width: min(100% - 2rem, 42rem);
+  width: min(100% - 2rem, 36rem);
   margin: 0 auto;
   margin-bottom: 1rem;
 }
@@ -818,16 +818,13 @@ h3 {
   overflow: visible;
 }
 
-#file_upload_section fieldset {
-  padding: 0.5rem;
-}
-#file_upload_section label.interact {
+label.interact {
   display: flex;
   align-items: center;
   border-radius: 0.3rem;
   padding: 0.5rem 1rem 0.5rem 0;
 }
-#file_upload_section label.interact input {
+label.interact input {
   height: 1.2em;
   width: 1.2em;
   accent-color: var(--accent-color);
