@@ -796,7 +796,8 @@
                 const filteredRequests = [];
                 const approvedRequests = new Set();
                 Object.values(kycRequests).forEach((request) => {
-                    const { time, tag, note, senderID } = request;
+                    const { time, tag, note, senderID, receiverID } = request;
+                    if (!floCrypto.isSameAddr(receiverID, floDapps.user.id)) return;
                     const floAddress = getFloAddress(senderID)
                     if (status === 'pending') {
                         if (approvedRequests.has(floAddress))
@@ -952,6 +953,7 @@
                                         const fileEntryResponse = await floCloudAPI.sendGeneralData({
                                             docType: selectedIdProof,
                                             docVectorClock: vectorClock,
+                                            receiverID: floCrypto.getFloID(selectedVerifier),
                                         }, 'userKycRequests')
                                         fileEntryResponse.message = floCloudAPI.util.decodeMessage(fileEntryResponse.message)
                                         // add file entry to general data
