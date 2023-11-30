@@ -581,7 +581,7 @@
                             <div class="flex gap-0-5 align-items-start">
                                 <sm-input placeholder="Bitcoin/FLO address to check" id="address_verify" class="flex-1"
                                     error-text="Invalid address" required></sm-input>
-                                <button id="verify" class="button button--primary icon-only" onclick=${initSearch} type="submit" title="search KYC status">
+                                <button id="verify" class="button button--primary icon-only" onclick=${initSearch} type="submit" title="search KYC status" disabled>
                                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>    
                                 </button>
                             </div>
@@ -839,7 +839,6 @@
                 const requests = getUserKycRequests();
                 const renderedRequests = Object.keys(requests).map((key) => {
                     const { time, tag, message: { docType }, note } = requests[key];
-                    const txId = tag?.split('|')[1] || undefined;
                     if (!isVerified && tag?.includes('approved'))
                         isVerified = true;
                     if (!tag && !note) {
@@ -850,11 +849,6 @@
                             <time>${getFormattedTime(time)}</time>
                             <div class="flex flex-direction-column gap-0-5">
                                 <h4>${docTypeNames[docType]}</h4>
-                                ${txId ? html`
-                                    <a href=${`https://blockbook.ranchimall.net/tx/${txId}`} target="_blank">
-                                        Check on blockchain
-                                    </a>
-                                `: ''}
                             </div>
                             ${isVerified ? html`
                                 <div class="flex gap-0-3 align-center">
@@ -1163,7 +1157,6 @@
                     <article id="home_page">
                         ${mainHeader}
                         <div id="verifier_wrapper" class="flex flex-wrap gap-1 align-items-start">
-                            <section id="verifier_balance_container" class="grid gap-1"> </section>
                             <section class="grid gap-1">
                                 <div id="kyc_requests_header" class="flex align-center space-between gap-1 flex-wrap">
                                     <h3>KYC requests</h3>
@@ -1193,11 +1186,8 @@
                                 </ul>
                             </section>
                         </div>
-                        <button id="commit_approvals" class="fab button button--primary" data-count="0" onclick=${initApproval}>Commit approvals</button>
                     </article>
                 `);
-                if (lastPage !== page)
-                    checkBalance();
             } else if (floGlobals.isAdmin) {
                 const renderedSubAdmins = floGlobals.subAdmins.map(address => render.approvedAggregatorCard(address));
                 renderElem(getRef('app_body'), html`
@@ -1395,15 +1385,26 @@
         floGlobals.approvalsToBeCommitted = new Map();
         async function approveKyc(e) {
             const button = e.target.closest('button');
+            const confirmation = await getConfirmation('Approve this KYC?', {
+                confirmText: 'Approve',
+            });
+            if (!confirmation) return;
+            buttonLoader(button, true)
             const { requestVC, docVC, senderID } = floGlobals.currentRequest;
-            floGlobals.approvalsToBeCommitted.set(senderID, {
-                requestVC,
-                docVC,
+            Promise.all([
+                floCloudAPI.tagApplicationData(requestVC, `approved`),
+                floCloudAPI.tagApplicationData(docVC, `approved`)
+            ]).then(() => {
+                floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].tag = `approved`
+                notify('KYC approved successfully', 'success');
+                closePopup()
+                renderHome()
+            }).catch(err => {
+                console.error(err)
+                notify('Error approving KYC', 'error');
+            }).finally(() => {
+                buttonLoader(button, false)
             })
-            getRef('commit_approvals').dataset.count = floGlobals.approvalsToBeCommitted.size
-            closePopup()
-            floGlobals.currentRequest = null;
-            renderHome()
         }
         async function rejectKyc(e) {
             const confirmation = await getConfirmation('Are you sure you want to reject this KYC?', {
@@ -1433,10 +1434,6 @@
                     requestVC: e.target.dataset.requestVC,
                     docVC: e.target.dataset.docVC,
                 })
-                const floData = `KYC|REVOKE_KYC|${[...addressesToRevoke.keys()].join(',')}`
-                if (floData.length > 1040) {
-                    return notify('Maximum limit reached for this batch. Revoke selected and continue the process.', 'error')
-                }
             } else {
                 addressesToRevoke.delete(e.target.value)
             }
@@ -1456,132 +1453,6 @@
             getRef('selected_wrapper').classList.add('hidden')
             getRef('kyc_requests_list').querySelectorAll('input').forEach(input => input.checked = false)
         }
-        function checkBalance() {
-            renderElem(getRef('verifier_balance_container'), html`
-                <h4>FLO balance</h4>
-                <div class="flex align-center gap-1">
-                    <sm-spinner></sm-spinner>
-                    <span>Checking balance...</span>
-                </div>
-            `)
-            floBlockchainAPI.getBalance(floGlobals.myFloID).then(balance => {
-                if (balance < 0.01) {
-                    renderElem(getRef('verifier_balance_container'), html`
-                        <div class="flex align-center space-between gap-1">
-                            <h4>FLO balance</h4>
-                            <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
-                        </div>
-                        <h2 style="color: var(--danger-color)">Insufficient balance</h2>
-                    `)
-                } else {
-                    renderElem(getRef('verifier_balance_container'), html`
-                        <div class="flex align-center space-between gap-1">
-                            <h4>FLO balance</h4>
-                            <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
-                        </div>
-                        <h2>${balance} FLO</h2>
-                    `)
-                }
-            }).catch(err => {
-                console.error(err)
-                renderElem(getRef('verifier_balance_container'), html`
-                    <div class="flex align-center space-between gap-1">
-                        <h4>FLO balance</h4>
-                        <button class="button button--colored button--small" onclick=${checkBalance}>Refresh</button>
-                    </div>
-                    <h2 style="color: var(--danger-color)">Error fetching balance</h2>
-                `)
-            })
-        }
-        function initApproval() {
-            const approvedAddress = [...floGlobals.approvalsToBeCommitted.keys()].map(address => {
-                function removeKYC(e) {
-                    floGlobals.approvalsToBeCommitted.delete(address)
-                    getRef('commit_approvals').dataset.count = floGlobals.approvalsToBeCommitted.size
-                    renderHome()
-                    e.target.closest('li').remove()
-                    if (floGlobals.approvalsToBeCommitted.size === 0) {
-                        closePopup()
-                    }
-                }
-                return html`
-                    <li class="kyc-to-commit grid gap-1">
-                        <div>
-                            <p>BTC address</p>
-                            <b class="wrap-around">${getBtcAddress(address)}</b>
-                        </div>
-                        <div>
-                            <p>FLO address</p>
-                            <b class="wrap-around">${address}</b>
-                        </div>
-                        <button class="button button--danger" onclick=${removeKYC}> Remove</button>
-                    </li>
-                `
-            })
-            renderElem(getRef('commit_approvals_popup__content'), html`
-                <div class="flex gap-1 align-center space-between">
-                    <h4>KYCs to commit</h4>
-                    <div class="multi-state-button">
-                        <button id="approve_kyc_button" class="button button--primary" onclick=${commitApprovals}>Commit</button>
-                    </div>
-                </div>
-                <ul class="grid gap-1-5">
-                    ${approvedAddress}
-                </ul>
-            `)
-            openPopup('commit_approvals_popup').closed.then(() => {
-                renderElem(getRef('commit_approvals_popup__content'), html``)
-            })
-        }
-        async function commitApprovals() {
-            const approverPrivateKey = await floDapps.user.private
-            if (!floGlobals.isSubAdmin) {
-                return notify('You are not authorized to approve KYC', 'error')
-            }
-            if (floGlobals.approvalsToBeCommitted.size === 0) {
-                return notify('Enter at least one address to approve', 'error')
-            }
-            const confirmation = await getConfirmation('Approve all listed KYCs?', {
-                confirmText: 'Approve',
-            })
-            if (!confirmation) return
-            const addresses = [...floGlobals.approvalsToBeCommitted.keys()]
-            // create multiple txs if addresses exceed 1040 characters
-            const addressesPerTx = 30
-            const chunks = Math.ceil(addresses.length / addressesPerTx)
-            let txPromises = []
-            for (let i = 0; i < chunks; i++) {
-                const chunk = addresses.slice(i * addressesPerTx, (i + 1) * addressesPerTx)
-                const floData = `KYC|APPROVE_KYC|${chunk.join('+')}`
-                txPromises.push(floBlockchainAPI.writeData(floGlobals.myFloID, floData, approverPrivateKey, floGlobals.myFloID))
-            }
-            buttonLoader(getRef('approve_kyc_button'), true)
-            try {
-                const txIds = await Promise.all(txPromises)
-                const cloudPromises = [...floGlobals.approvalsToBeCommitted.values()].flatMap(({ requestVC, docVC }) => {
-                    floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].tag = `approved|${txIds.join('+')}`
-                    return [
-                        floCloudAPI.tagApplicationData(requestVC, `approved|${txIds.join('+')}`),
-                        floCloudAPI.tagApplicationData(docVC, `approved|${txIds.join('+')}`)
-                    ]
-                })
-                await Promise.all(cloudPromises)
-                console.log(`Approval request submitted. TXIDs: ${txIds.join(', ')}`)
-                notify('Users approved successfully', 'success');
-                floGlobals.approvalsToBeCommitted.clear()
-                getRef('commit_approvals').dataset.count = floGlobals.approvalsToBeCommitted.size
-                renderHome()
-                closePopup()
-            } catch (err) {
-                console.error(err)
-                notify('Error approving users', 'error');
-            } finally {
-                buttonLoader(getRef('approve_kyc_button'), false)
-                setTimeout(() => {
-                    checkBalance()
-                }, 1000)
-            }
-        }
         async function revokeKycs() {
             try {
                 const approverPrivateKey = await floDapps.user.private
@@ -1591,17 +1462,11 @@
                 if (addressesToRevoke.size === 0) {
                     return notify('Select at least one address to revoke', 'error')
                 }
-                let floData = `KYC|REVOKE_KYC|${[...addressesToRevoke.keys()].join('+')}`
-                console.log(floData)
-                if (floData.length > 1040) {
-                    return notify('Too many addresses selected. Try removing one.', 'error')
-                }
                 const confirmation = await getConfirmation('Revoke selected addresses?', {
                     confirmText: 'Revoke',
                 })
                 if (!confirmation) return
                 buttonLoader(getRef('revoke_kyc_button'), true)
-                const txId = await floBlockchainAPI.writeData(floGlobals.myFloID, floData, approverPrivateKey, floGlobals.myFloID)
                 const cloudPromises = [...addressesToRevoke.values()].flatMap(({ requestVC, docVC }) => {
                     floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].tag = null
                     floGlobals.generalData[floCloudAPI.util.filterKey('userKycRequests')][requestVC].note = 'revoked'
@@ -1612,17 +1477,14 @@
                     ]
                 })
                 const cloudResponses = await Promise.all(cloudPromises)
-                notify(`Revoke request submitted. TXID: ${txId}`, 'success');
+                notify(`Revoke request submitted`, 'success');
                 addressesToRevoke.clear()
                 clearSelection()
             } catch (e) {
-                notify('Error revoking users. If you have just approved or revoked KYCs wait for 5 mins.', 'error');
+                notify('Error revoking users.', 'error');
                 console.error(e)
             } finally {
                 buttonLoader(getRef('revoke_kyc_button'), false)
-                setTimeout(() => {
-                    checkBalance()
-                }, 1000)
                 getRef('selected_addresses').textContent = ``
                 getRef('selected_wrapper').classList.add('hidden')
                 getRef('kyc_requests_header').classList.remove('hidden')
@@ -1720,14 +1582,6 @@
             buttonLoader(getRef('approve_verifier_button'), true)
             try {
                 const adminPrivateKey = await floDapps.user.private
-                // const floData = `KYC|APPROVE_AGGREGATOR|${addresses.join('+')}`
-                // if (floData.length > 1040) {
-                //     return notify('Too many addresses added. Try removing one.', 'error')
-                // }
-                // const [txId] = await Promise.all([
-                //     floBlockchainAPI.writeData(floGlobals.myFloID, floData, adminPrivateKey, floGlobals.myFloID),
-                //     floDapps.manageAppConfig(adminPrivateKey, addresses)
-                // ])
                 await floDapps.manageAppConfig(adminPrivateKey, addresses)
                 notify(`Verifiers approval request submitted. May take upto 30 mins to complete.`, 'success');
                 floGlobals.subAdmins = [...new Set([...floGlobals.subAdmins, ...addresses])]
@@ -1763,15 +1617,8 @@
             buttonLoader(getRef('revoke_verifier_button'), true)
             try {
                 const adminPrivateKey = await floDapps.user.private
-                const floData = `KYC|REVOKE_AGGREGATOR|${addresses.join('+')}`
-                if (floData.length > 1040) {
-                    return notify('Too many addresses selected. Try removing one.', 'error')
-                }
-                const [txId] = await Promise.all([
-                    floBlockchainAPI.writeData(floGlobals.myFloID, floData, adminPrivateKey, floGlobals.myFloID),
-                    floDapps.manageAppConfig(adminPrivateKey, undefined, addresses)
-                ])
-                notify(`Verifiers revoke request submitted. TXID: ${txId}`, 'success');
+                await floDapps.manageAppConfig(adminPrivateKey, undefined, addresses)
+                notify(`Verifiers revoke request submitted.`, 'success');
                 floGlobals.subAdmins = floGlobals.subAdmins.filter(address => !addresses.includes(address))
                 closePopup()
                 renderHome()

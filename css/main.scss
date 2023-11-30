@@ -818,11 +818,9 @@ label.interact {
   }
 }
 #verifier_wrapper {
-  & > * {
-    background-color: rgba(var(--foreground-color), 1);
-    border-radius: 0.5rem;
-    padding: 1rem;
-  }
+  background-color: rgba(var(--foreground-color), 1);
+  border-radius: 0.5rem;
+  padding: 1rem;
 }
 #verifier_balance_container {
   width: 100%;
@@ -963,8 +961,7 @@ label.interact {
   }
   #verifier_wrapper {
     display: grid;
-    grid-template-columns: 16rem 1fr;
-    width: min(64rem, 100%);
+    width: min(48rem, 100%);
     margin: 0 auto;
     align-items: flex-start;
   }
