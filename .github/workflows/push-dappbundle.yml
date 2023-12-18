@@ -20,6 +20,8 @@ jobs:
               cd ${{ secrets.DEPLOYMENT_LOCATION}}/ && git clone https://github.com/ranchimall/dappbundle.git 
             fi
 
+            git pull
+
             if [ -d "${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle/${{ github.event.repository.name }}" ]; then
               echo "Repository exists. Remove folder "
               rm -r "${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle/${{ github.event.repository.name }}"
