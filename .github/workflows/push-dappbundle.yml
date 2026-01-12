@@ -29,4 +29,4 @@ jobs:
             cd ${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle && git clone https://github.com/ranchimall/${{ github.event.repository.name }}
 
             cd "${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle/${{ github.event.repository.name }}" && rm -rf .gitattributes .git .github .gitignore
-            cd ${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle/ && git add . && git commit -m "Workflow updating files of ${{ github.event.repository.name }}" && git push "https://saketongit:${{ secrets.DAPPBUNDLE_ACCESS_TOKEN }}@github.com/ranchimall/dappbundle.git"
+            cd ${{ secrets.DEPLOYMENT_LOCATION}}/dappbundle/ && git add . && git commit -m "Workflow updating files of ${{ github.event.repository.name }}" && git push "https://saketongit:${{ secrets.RM_ACCESS_TOKEN }}@github.com/ranchimall/dappbundle.git"
